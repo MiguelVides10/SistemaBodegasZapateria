@@ -1,0 +1,109 @@
+{% extends "../base.html"%}
+{% load static %}
+{%block template%}
+<div class="container-fluid p-0">
+  
+  <div class="row ">
+    <div class="col-2">
+      <label for="">Reporte por producto</label>
+    </div>
+    <div class="col-3">
+      <select class="form-select" id="productos" name="productos">
+        <option hidden selected>Producto</option>
+      </select>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteTalla()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteTalla()">Descargar reporte</button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-5">
+      <label for="">Reporte general</label>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="generarReporte()">
+        Generar Reporte
+      </button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="descargarReporte()">
+        Descargar Reporte
+      </button>
+    </div>
+  </div>
+</div>
+
+{%endblock%}
+
+{%block script%}
+<script>
+  const currentUrl = window.location.href;
+  const urlBase = currentUrl.split("/")[2];
+  const protocolo = currentUrl.split(":")[0];
+  const url = protocolo + "://" + urlBase;
+  function generarReporte() {
+    window.open(`${url}/cuerpo/`, '_blank');
+
+    // window.location.href = `${url}/cuerpo/`;
+  }
+  function descargarReporte() {
+    window.location.href = `${url}/cuerpo/?descargar=1`;
+  }
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    const headers = new Headers({
+      Authorization: `Token ${localStorage.getItem("token")}`,
+    });
+    let productos = await fetch(`${url}/api/productos`, {
+      method: "GET",
+      headers: headers,
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        } else {
+          throw "Error en la llamada";
+        }
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+
+    productos = JSON.parse(productos);
+    let listaProductos = "<option value='0' hidden selected>Productos</option>";
+    if (productos.success) {
+      productos.data.forEach((element) => {
+        listaProductos += `<option value='${element.cod_prod}'>${element.cod_prod}</option>`;
+      });
+    }
+    const selectElement2 = document.getElementById("productos");
+    selectElement2.innerHTML = listaProductos;
+  });
+  
+  function generarReporteTalla() {
+    const cod_prod = document.getElementById("productos").value;
+    if (cod_prod == "" || cod_prod == "0") {
+      alert("Seleccione un producto");
+      return;
+    }
+    window.open(`${url}/reporteportalla/?cod_prod=${cod_prod}`, '_blank');
+  }
+  
+  function descargarReporteTalla() {
+    const cod_prod = document.getElementById("productos").value;
+    if (cod_prod == "" || cod_prod == "0") {
+      alert("Seleccione un producto");
+      return;
+    }
+    window.location.href = `${url}/reporteportalla/?cod_prod=${cod_prod}&descargar=1`
+  }
+  
+</script>
+{%endblock%}

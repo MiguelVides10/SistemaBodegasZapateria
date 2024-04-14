@@ -1,0 +1,138 @@
+{%extends "../base.html"%}
+{%load static%}
+{%block template%}
+<div class="container">
+    <form action="" id="marcasForm" class="d-flex">
+        <div class="form-floating mb-3 mx-4 w-50">
+            <input name="nombre_marca" id="nombre_marca" class="form-control" type="text" placeholder="Stock minimo"
+                required />
+            <label for="nombre_marca">Ingrese el nombre de la Marca</label>
+        </div>
+        <button class="btn btn-secondary mb-4" type="submit">Agregar Marca</button>
+    </form>
+    <table id="tablaMarcas" class="table table-striped" style="width:100%">
+    </table>
+
+</div>
+{%endblock%}
+
+{%block script%}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.jqueryui.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> -->
+
+<script>
+    const currentUrl = window.location.href;
+    const urlBase = currentUrl.split("/")[2];
+    const protocolo = currentUrl.split(":")[0];
+    const url = protocolo + "://" + urlBase;
+    document.addEventListener("DOMContentLoaded", async function () {
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`
+        });
+        let marcas = await fetch(`${url}/api/marcas`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        marcas = JSON.parse(marcas);
+        let tabla = `
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Marca</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>`;
+        if (marcas.success) {
+            marcas.data.forEach(element => {
+                tabla += `
+            <tr>
+                <td>${element.id_marca}</td>
+                <td>${element.nombre_marca}</td>
+
+                <td>
+                    <a class="mb-2" onClick="editar('${element.id_marca}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit align-middle me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
+                                    </a>
+                    <a class="mb-2" onClick="eliminar('${element.id_marca}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2 align-middle me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                    </a>
+                    <a class="mb-2" onClick="verProducto('${element.id_marca}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye align-middle me-2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </a>
+                </td>
+            </tr>`;
+            });
+        }
+        const tablaMarca = document.getElementById('tablaMarcas');
+        tablaMarca.innerHTML = tabla;
+
+        new DataTable('#tablaMarca');
+    });
+    async function guardarMarca() {
+        const form = document.getElementById('marcasForm');
+        const element = form.elements;
+        const data = {
+            "nombre_marca": element.nombre_marca.value,
+        }
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        });
+        let response = await fetch(`${url}/api/guardarMarca/`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+            location.href = '/marcas/';
+
+        } else {
+            alert(response.message);
+        }
+
+    }
+    const form = document.getElementById("marcasForm");
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        guardarMarca();
+    });
+</script>
+{%endblock%}

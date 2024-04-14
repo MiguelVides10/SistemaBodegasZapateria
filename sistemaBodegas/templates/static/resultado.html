@@ -1,0 +1,215 @@
+{%extends "../base.html"%}
+{% load static %}
+
+{%block template%}
+<div class="container">
+	<h3 class="h3">Buscar artículo</h3>
+	<div class="row">
+		<div class="col">
+			<div class="form-floating">
+				<select class="form-select" id="bodega" name="bodega">
+					<option hidden selected>Bodega</option>
+				</select>
+				<label for="almacen">Seleccione una bodega</label>
+			</div>
+		</div>
+		<div class="col">
+			<div class="form-floating mb-3">
+				<select class="form-select" id="productos" name="productos">
+					<option hidden selected>Producto</option>
+					<option>color 1</option>
+					<option>color 2</option>
+					<option>color 3</option>
+				</select>
+				<label for="marca">Seleccione un producto</label>
+			</div>
+		</div>
+		<div class="col">
+			<div class="form-floating mb-3">
+				<select class="form-select" id="talla" name="talla">
+					<option hidden selected value="0">Tallas</option>
+					<option>35</option>
+					<option>36</option>
+					<option>37</option>
+					<option>38</option>
+					<option>39</option>
+					<option>40</option>
+					<option>41</option>
+					<option>42</option>
+					<option>43</option>
+				</select>
+				<label for="marca">Seleccione una talla</label>
+			</div>
+		</div>
+
+		<div class="col">
+			<button class="btn btn-outline-secondary w-50 h-50" onclick="buscarProducto()">Buscar</button>
+		</div>
+	</div>
+	<h3 class="font-weight-bold">Resultados:</h3>
+	<div class="d-flex" style="display: none !important;" id="resultado">
+
+	</div>
+</div>
+<script>
+	const currentUrl = window.location.href;
+	const urlBase = currentUrl.split("/")[2];
+	const protocolo = currentUrl.split(":")[0];
+	const idBodega = currentUrl.split("/")[4];
+	const codProd = currentUrl.split("/")[5];
+	const tallas = currentUrl.split("/")[6];
+	const url = protocolo + "://" + urlBase;
+	document.addEventListener("DOMContentLoaded", async function () {
+		const headers = new Headers({
+			'Authorization': `Token ${localStorage.getItem('token')}`
+		});
+		let bodegas = await fetch(`${url}/api/bodegas`, {
+			method: 'GET',
+			headers:headers
+		})
+			.then(function (response) {
+				if (response.ok) {
+					return response.text()
+				} else {
+					throw "Error en la llamada";
+				}
+
+			})
+			.then(function (texto) {
+				return texto;
+			})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		bodegas = JSON.parse(bodegas);
+		let listaBodegas = "<option value='0' hidden selected>Bodegas</option>";
+		if (bodegas.success) {
+			bodegas.data.forEach(element => {
+				listaBodegas += `<option value='${element.id_sucursal}'>${element.nom_sucursal}</option>`;
+			});
+		}
+		const selectElement = document.getElementById('bodega');
+		selectElement.innerHTML = listaBodegas;
+
+
+
+		let productos = await fetch(`${url}/api/productos`, {
+			method: 'GET',
+			headers:headers
+
+		})
+			.then(function (response) {
+				if (response.ok) {
+					return response.text()
+				} else {
+					throw "Error en la llamada";
+				}
+
+			})
+			.then(function (texto) {
+				return texto;
+			})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+
+		productos = JSON.parse(productos);
+		let listaProductos = "<option value='0' hidden selected>Productos</option>";
+		if (productos.success) {
+			productos.data.forEach(element => {
+				listaProductos += `<option value='${element.cod_prod}'>${element.cod_prod}</option>`;
+			});
+		}
+		const selectElement2 = document.getElementById('productos');
+		selectElement2.innerHTML = listaProductos;
+
+		console.log(`${url}/api/buscar/${idBodega}/${codProd}/${tallas}`)
+		let inventario = await fetch(`${url}/api/buscar/${idBodega}/${codProd}/${tallas}`, {
+			method: 'GET',
+			headers:headers
+		}).then(function (response) {
+			if (response.ok) {
+				return response.text()
+			} else {
+				throw "Error en la llamada";
+			}
+		}).then(function (texto) {
+			return texto;
+		})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		inventario = JSON.parse(inventario);
+		console.log(inventario);
+		let contenido = ``;
+		if (inventario.success) {
+			contenido += `
+					<div class="mr-4 d-flex flex-column w-50">
+						<span class="h3 mt-3">Nombre: ${inventario.data[0]}</span>
+						<span class="h3 mt-3">Talla: ${inventario.data[1]}</span>
+						<span class="h3 mt-3">Color: ${inventario.data[2]}</span>
+						<span class="h3 mt-3">Almacen: ${inventario.data[3]}</span>
+						<span class="h3 mt-3">Cantidad disponibles: ${inventario.data[4]}</span>
+						<span class="h3 mt-3">Precio: $${inventario.data[5]}</span>
+					</div>
+					<div class="d-flex flex-column w-50">
+						<span class="h3 mt-3">Marca: ${inventario.data[6]}</span>
+						<img src="${inventario.data[7]}" alt="zapatos" class="w-50">
+						<button type="submit" class="btn btn-outline-secondary text-dark w-50 h-25 mt-3" >Vender</button>
+					</div>`
+		}
+		resultado.innerHTML = contenido;
+		resultado.style.display = "block"
+	});
+	buscarProducto = async () => {
+		const resultado = document.getElementById("resultado");
+		const bodega = document.getElementById("bodega");
+		const productos = document.getElementById("productos");
+		const talla = document.getElementById("talla");
+		const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`
+        });
+		let inventario = await fetch(`${url}/api/buscar/${bodega.value}/${productos.value}/${talla.value}`, {
+			method: 'GET',
+			headers:headers
+		}).then(function (response) {
+			if (response.ok) {
+				return response.text()
+			} else {
+				throw "Error en la llamada";
+			}
+		}).then(function (texto) {
+			return texto;
+		})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		inventario = JSON.parse(inventario);
+		let contenido = ``;
+		if (inventario.success) {
+			contenido += `
+					<div class="mr-4 d-flex flex-column w-50">
+						<span class="h3 mt-3">Nombre: ${inventario.data.producto}</span>
+						<span class="h3 mt-3">Talla: ${inventario.data.talla}</span>
+						<span class="h3 mt-3">Color: ${inventario.data.color}</span>
+						<span class="h3 mt-3">Almacen: ${inventario.data.sucursal}</span>
+						<span class="h3 mt-3">Cantidad disponibles: ${inventario.data.total}</span>
+						<span class="h3 mt-3">Precio: $${inventario.data.precio}</span>
+					</div>
+					<div class="d-flex flex-column w-50">
+						<span class="h3 mt-3">Marca: ${inventario.data.marca}</span>
+						<img src="${inventario.data.foto}" alt="zapatos" class="w-50">
+						<button type="submit" class="btn btn-outline-secondary text-dark w-50 h-25 mt-3" >Vender</button>
+					</div>`
+		}
+
+		window.location.href = `${url}/buscar/${bodega.value}/${productos.value}/${talla.value}`;
+		resultado.innerHTML = contenido;
+		resultado.style.display = "block"
+	}
+</script>
+{% endblock %}

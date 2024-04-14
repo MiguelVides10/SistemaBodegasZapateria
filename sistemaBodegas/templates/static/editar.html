@@ -1,0 +1,211 @@
+{% extends "../base.html"%}
+{% load static %}
+
+{%block template%}
+<div class="container">
+  <h1 class="h1 mb-3 text-center">Editar Producto</h1>
+
+  <form action="" id="productosForm">
+    <div class="d-flex ">
+      <div class="me-4 d-flex flex-column w-50 ">
+        <div class="form-floating mb-3">
+          <input name="cod_prod" id="cod_prod" class="form-control" type="text" placeholder="Codigo producto" required
+            data-tipo="codigo" />
+          <label for="cod_prod">Codigo del producto</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select class="form-select" id="id_categoria" name="id_categoria">
+            <option hidden>Seleccione una categoria</option>
+          </select>
+          <label for="id_categoria">Categorías</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input name="color" id="color" class="form-control" type="text" placeholder="Stock minimo" />
+          <label for="color">Color</label>
+        </div>
+        <input type="file" class="form-control" id="foto" name="foto">
+        <img src="" alt="imagen zapatos" id="imagen" class="w-50 my-3">
+      </div>
+      <div class="d-flex flex-column w-50">
+        <div class="form-floating mb-3">
+          <input name="descripcion" id="descripcion" class="form-control" type="text"
+            placeholder="Descripcion del producto" required />
+          <label for="descripcion">Descripcion del producto</label>
+        </div>
+        <div class="form-floating mb-3">
+          <select class="form-select" id="id_marca" name="id_marca">
+            <option hidden>Seleccione una marca</option>
+          </select>
+          <label for="id_marca">Marca</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input name="precio" id="precio" class="form-control" type="number" placeholder="Precio unitario:"
+            data-tipo="precio" />
+          <label for="precio">Precio</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <button type="submit" class="btn btn-secondary mt-4 w-50">Editar producto</button>
+    </div>
+  </form>
+</div>
+{%endblock%}
+
+{%block script%}
+<script>
+  const currentUrl = window.location.href;
+  const urlBase = currentUrl.split("/")[2];
+  const protocolo = currentUrl.split(":")[0];
+  const cod_prod = currentUrl.split("/")[4];
+  const url = protocolo + "://" + urlBase;
+
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    const headers = new Headers({
+      'Authorization': `Token ${localStorage.getItem('token')}`
+    });
+    let categorias = await fetch(`${url}/api/categorias`, {
+      method: 'GET',
+      headers: headers
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text()
+        } else {
+          throw "Error en la llamada";
+        }
+
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    categorias = JSON.parse(categorias);
+    let listaCategorias = "";
+    if (categorias.success) {
+      categorias.data.forEach(element => {
+        listaCategorias += `<option value='${element.id_categoria}'>${element.categoria}</option>`;
+      });
+    }
+    const selectElement = document.getElementById('id_categoria');
+    selectElement.innerHTML = listaCategorias;
+
+    let marcas = await fetch(`${url}/api/marcas`, {
+      method: 'GET',
+      headers: headers
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text()
+        } else {
+          throw "Error en la llamada";
+        }
+
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+
+    marcas = JSON.parse(marcas);
+    let listaMarcas = "";
+    if (marcas.success) {
+      marcas.data.forEach(element => {
+        listaMarcas += `<option value='${element.id_marca}'>${element.nombre_marca}</option>`;
+      });
+    }
+    const selectElement2 = document.getElementById('id_marca');
+    selectElement2.innerHTML = listaMarcas;
+
+    let producto = await fetch(`${url}/api/productos/${cod_prod}`, {
+      method: "GET",
+      headers: headers
+    }).then(function (response) {
+      if (response.ok) {
+        return response.text()
+      } else {
+        throw "Error en la llamada";
+      }
+    }).then(function (texto) {
+      return texto;
+    })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    producto = JSON.parse(producto);
+    const elements = document.getElementById("productosForm").elements;
+    var selectMarca = document.getElementById("id_marca");
+    var selectCat = document.getElementById("id_categoria");
+    const imagen = document.getElementById("imagen");
+    if (producto.success) {
+      elements.cod_prod.value = producto.data.cod_prod;
+      elements.cod_prod.setAttribute("readonly", "");
+      elements.descripcion.value = producto.data.descripcion,
+        selectMarca.value = producto.data.id_marca,
+        imagen.src = producto.data.foto,
+        elements.color.value = producto.data.color,
+        selectCat.value = producto.data.id_categoria,
+        elements.precio.value = producto.data.precio;
+    }
+  });
+
+  async function editarProducto() {
+    const form = document.getElementById('productosForm');
+    const element = form.elements;
+    const data = {
+      "cod_prod": element.cod_prod.value,
+      "descripcion": element.descripcion.value,
+      "id_marca": element.id_marca.value,
+      "color": element.color.value,
+      "id_categoria": element.id_categoria.value,
+      "precio": element.precio.value,
+    }
+    const headers = new Headers({
+      'Authorization': `Token ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    });
+    let response = await fetch(`${url}/api/editarProducto/${cod_prod}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: headers
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text()
+        } else {
+          throw "Error en la llamada";
+        }
+
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    response = JSON.parse(response);
+    if (response.success) {
+      alert(response.message);
+      location.href = '/productos/';
+
+    } else {
+      alert(response.message);
+    }
+
+  }
+  const form = document.getElementById("productosForm");
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    editarProducto();
+  });
+</script>
+{%endblock%}

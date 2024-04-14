@@ -1,0 +1,369 @@
+{% extends "../base.html"%}
+{% load static %}
+
+{%block template%}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css" rel="stylesheet">
+
+<div class="container">
+    <div class="d-flex mb-4">
+        <a class="btn btn-secondary me-3" href="/guardar/">Nuevo Producto</a>
+        <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalMarcas">
+            Marcas
+        </button>
+        <div class="modal fade" id="modalMarcas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Marcas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="marcasTabla">
+
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="d-flex">
+                            <div class="form-floating me-3">
+                                <input name="nombre_marca" id="nombre_marca" class="form-control" type="text"
+                                    placeholder="Stock minimo" required />
+                                <label for="nombre_marca">Nombre de la Marca</label>
+                            </div>
+                            <button class="btn btn-secondary" onclick="guardarMarca()" >Agregar
+                                Marca</button>
+                            </div>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCategorias">
+            Categorías
+        </button>
+        <div class="modal fade" id="modalCategorias" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Categorías</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="categoriasTabla">
+
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="" id="catForm" class="d-flex">
+                            <div class="form-floating me-3">
+                                <input name="categoria" id="categoria" class="form-control" type="text" required />
+                                <label for="categoria">Categoría</label>
+                            </div>
+                            <button class="btn btn-secondary" type="submit">Agregar
+                                Categoría</button>
+                        </form>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <table id="tablaProductos" class="table table-striped" style="width:100%">
+    </table>
+
+</div>
+{%endblock%}
+
+{%block script%}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.jqueryui.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> -->
+
+<script>
+    const currentUrl = window.location.href;
+    const urlBase = currentUrl.split("/")[2];
+    const protocolo = currentUrl.split(":")[0];
+    const url = protocolo + "://" + urlBase;
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`
+        });
+        let productos = await fetch(`${url}/api/productos`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        productos = JSON.parse(productos);
+        let tabla = `
+        <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Descripcion</th>
+                <th>Marca</th>
+                <th>Categoria</th>
+                <th>Color</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>`;
+        if (productos.success) {
+            productos.data.forEach(element => {
+                tabla += `
+            <tr>
+                <td>${element.cod_prod}</td>
+                <td>${element.descripcion}</td>
+                <td>${element.marca}</td>
+                <td>${element.categoria}</td>
+                <td>${element.color}</td>
+                <td>${element.precio}</td>
+                <td>
+                    <a class="mb-2" onClick="editar('${element.cod_prod}')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit align-middle me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
+									</a>
+                    <a class="mb-2" onClick="eliminar('${element.cod_prod}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2 align-middle me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+									</a>
+                </td>
+            </tr>`;
+            });
+        }
+        const tablaProductos = document.getElementById('tablaProductos');
+        tablaProductos.innerHTML = tabla;
+
+        new DataTable('#tablaProductos');
+
+        let categorias = await fetch(`${url}/api/categorias`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+
+        categorias = JSON.parse(categorias);
+        let tablaCat = `<thead>
+                            <tr>
+                                <th>Categorías</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+        if (categorias.success) {
+            categorias.data.forEach(element => {
+                tablaCat += `<tr>
+                                <td>${element.categoria} </td>
+                            </tr>
+                            </tbody>`
+            });
+        }
+        const tablaCategoria = document.getElementById("categoriasTabla");
+        tablaCategoria.innerHTML = tablaCat;
+
+        let marcas = await fetch(`${url}/api/marcas`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+
+        marcas = JSON.parse(marcas);
+        let tablaMarcas = `<thead>
+                            <tr>
+                                <th>Marcas</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+        if (marcas.success) {
+            marcas.data.forEach(element => {
+                tablaMarcas += `<tr>
+                                <td>${element.nombre_marca} </td>
+                            </tr>
+                            </tbody>`
+            });
+        }
+        const tablaMarca = document.getElementById("marcasTabla");
+        tablaMarca.innerHTML = tablaMarcas;
+    });
+
+    async function guardarCategoria() {
+        const form = document.getElementById("catForm");
+        const element = form.elements;
+        console.log(form);
+        const data = {
+            "categoria": element.categoria.value,
+        }
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        });
+        let response = await fetch(`${url}/api/guardarCategoria/`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+        } else {
+            alert(response.message);
+        }
+        window.location.href = "/productos/";
+
+    }
+
+    async function guardarMarca() {
+        
+        const marca = document.getElementById("nombre_marca").value;
+        const data = {
+            "nombre_marca": marca,
+        }
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        });
+        console.log(data);
+        let response = await fetch(`${url}/api/guardarMarca/`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+        } else {
+            alert(response.message);
+        }
+        window.location.href = "/productos/";
+
+    }
+
+    const formMarca = document.getElementById("marcasForm");
+    formMarca.addEventListener('submit', function(event){
+        event.prevenDefault();
+        alert("vsth");
+        guardarMarca();
+    });
+
+    const formCat = document.getElementById("catForm");
+    formCat.addEventListener('submit', function(event){
+        event.preventDefault();
+        guardarCategoria();
+    });
+
+    function editar(cod_prod) {
+        window.location.href = `${url}/editar/${cod_prod}`
+    }
+
+    async function eliminarProducto(cod_prod){
+        const headers = new Headers({
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+        });
+        let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`,{
+            method : 'DELETE',
+            headers: headers
+        }).then(function (response) {
+                if (response.ok) {
+                return response.text()
+                } else {
+                throw "Error en la llamada";
+            }
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+            response = JSON.parse(response);
+            if (response.success) {
+                alert(response.message);
+                window.location.href = "/productos/";
+            } else {
+                alert(response.message);
+            }
+    }
+    function eliminar(cod_prod) {
+        eliminarProducto(cod_prod);
+    }
+
+</script>
+{%endblock%}

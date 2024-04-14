@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5" />
+  <meta name="author" content="zapateria" />
+  <meta name="keywords"
+    content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link rel="shortcut icon" href="{% static 'img/icons/zapatoimg.png'%}" />
+  <link rel="stylesheet" href="{% static '/css/app.css'%}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+  <title>Calzado Nahomy</title>
+
+  <link href="{% static '/css/app.css'%}" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="wrapper">
+    <nav id="sidebar" class="sidebar js-sidebar main-color">
+      <div class="sidebar-content js-simplebar">
+        <a class="sidebar-brand" href="/">
+          <h2 class="align-middle text-center text-light">Calzado Nahomy</h2>
+          <span class="align-middle d-flex justify-content-center">
+            <img src="{% static '/img/photos/calzadosnahomy.jpg'%}" alt="logo" class="align-middle w-50" />
+          </span>
+        </a>
+        <ul class="sidebar-nav">
+          <li class="sidebar-header">Acciones</li>
+
+          <li class="sidebar-item {% if navbar == 'productos'%} active {%endif%}">
+            <a class="sidebar-link" href="{% url 'productos'%}">
+              <i class="align-middle" data-feather="save"></i>
+              <span class="align-middle">Productos</span>
+            </a>
+          </li>
+
+          <li class="sidebar-item {% if navbar == 'buscar'%} active {%endif%}">
+            <a class="sidebar-link" href="{% url 'buscar'%}">
+              <i class="align-middle" data-feather="search"></i>
+              <span class="align-middle">Buscar producto</span>
+            </a>
+          </li>
+
+          <li class="sidebar-item {% if navbar == 'inventario'%} active {%endif%}">
+            <a class="sidebar-link" href="{% url 'inventario'%}">
+              <i class="align-middle" data-feather="file"></i>
+              <span class="align-middle">Agregar inventario</span>
+            </a>
+          </li>
+
+          <li class="sidebar-item {% if navbar == 'reporte'%} active {%endif%}">
+            <a class="sidebar-link" href="{% url 'reporte'%}">
+              <i class="align-middle" data-feather="pie-chart"></i>
+              <span class="align-middle">Reporte</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="main">
+      <nav class="navbar navbar-expand navbar-light navbar-bg">
+        <a class="sidebar-toggle js-sidebar-toggle">
+          <i class="hamburger align-self-center"></i>
+        </a>
+
+        <div class="navbar-collapse collapse">
+          <ul class="navbar-nav navbar-align">
+            <li class="nav-item">
+              <span class="nav-link active" id="user"></a>
+            </li>
+            
+            <li class="nav-item">
+              <span class="nav-link active">&nbsp;</a>
+            </li>
+            
+            <li class="nav-item ">
+              <a class="d-flex align-items-center" onclick="salir()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-power align-middle me-2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+                <span class="nav-link">Salir</span>
+              </a>
+              </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="content">
+        {% block template %}
+
+        {% endblock %}
+      </main>
+
+      <footer class="footer">
+        <div class="d-flex justify-content-center">
+          <p>Calzados y Variedades Nahomy &copy </p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module" src="{% static 'js/app2.js'%}"></script>
+  <script type="module" src="{% static 'js/custom.js'%}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+  {%block script%}
+  {%endblock%}
+
+</body>
+<script>
+  const currentUrl = window.location.href;
+	const urlBase = currentUrl.split("/")[2];
+	const protocolo = currentUrl.split(":")[0];
+	const url = protocolo + "://" + urlBase;
+  
+  document.addEventListener("DOMContentLoaded", async function () {
+    const user = localStorage.getItem('user');
+    document.getElementById("user").innerHTML = user
+  });
+
+  const salir = async() => {
+    console.log("saliendo");
+    const request = `${url}/api/eliminar-token/`;
+    const token = localStorage.getItem('token');
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Token ${token}`);
+    let data = new FormData();
+    data.append("token",token);
+    let response = await fetch(request, {
+			method: 'POST',
+      headers: myHeaders,
+			body: data,
+		}).then(function (response) {
+			if (response.ok) {
+				return response.text()
+			} else {
+				throw "Error en la llamada";
+			}
+		}).then(function (texto) {
+			return texto;
+		})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		response = JSON.parse(response);
+    localStorage.removeItem('token');
+    location.href = '/login/'
+  }
+    
+</script>
+
+</html>

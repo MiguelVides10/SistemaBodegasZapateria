@@ -1,0 +1,245 @@
+{% extends "../base.html"%}
+{% load static %}
+
+{%block template%}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<div class="container-fluid p-0">
+    <h3>Agregar productos al inventario</h3>
+    <hr>
+    <div class="row mb-4">
+        <div class="col">
+            <select class="form-select" id="bodega" name="bodega">
+                <option hidden selected>Seleccione un almacen</option>
+            </select>
+        </div>
+        <div class="col">
+            <select class="form-select" id="cod_prod" name="cod_prod">
+                <option hidden selected>Productos</option>
+            </select>
+        </div>
+        <div class="col">
+            <select class="form-select" id="talla" name="talla">
+                <option hidden selected value="0">Tallas</option>
+                <option>35</option>
+                <option>36</option>
+                <option>37</option>
+                <option>38</option>
+                <option>39</option>
+                <option>40</option>
+                <option>41</option>
+                <option>42</option>
+                <option>43</option>
+            </select>
+        </div>
+        <div class="col">
+            <input type="number" class="form-control" id="cantidad" name="cantidad" placeholder="Cantidad" />
+        </div>
+        <div class="col">
+            <div>
+                <button class="btn btn-secondary h-75" onclick="agregarProducto()">Agregar producto</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Bodega</th>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Talla</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos">
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-9"></div>
+        <div class="col-3">
+            <div class="col">
+                <button class="btn btn-secondary h-75" onclick="guardarInventario()">Guardar inventario</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        let contador = 1;
+        const currentUrl = window.location.href;
+        const urlBase = currentUrl.split("/")[2];
+        const protocolo = currentUrl.split(":")[0];
+        const url = protocolo + "://" + urlBase;
+        document.addEventListener("DOMContentLoaded", async function () {
+            const headers = new Headers({
+                'Authorization': `Token ${localStorage.getItem('token')}`
+            });
+            let bodegas = await fetch(`${url}/api/bodegas`, {
+                method: 'GET',
+                headers:headers
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.text()
+                    } else {
+                        throw "Error en la llamada";
+                    }
+
+                })
+                .then(function (texto) {
+                    return texto;
+                })
+                .catch(function (err) {
+                    var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                    return respuesta;
+                });
+            bodegas = JSON.parse(bodegas);
+            let listaBodegas = "<option value='0' hidden selected>Seleccione una bodega</option>";
+            if (bodegas.success) {
+                bodegas.data.forEach(element => {
+                    listaBodegas += `<option value='${element.id_sucursal}'>${element.nom_sucursal}</option>`;
+                });
+            }
+            const selectElement = document.getElementById('bodega');
+            selectElement.innerHTML = listaBodegas;
+
+
+
+            let productos = await fetch(`${url}/api/productos`, {
+                method: 'GET',
+                headers:headers
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.text()
+                    } else {
+                        throw "Error en la llamada";
+                    }
+
+                })
+                .then(function (texto) {
+                    return texto;
+                })
+                .catch(function (err) {
+                    var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                    return respuesta;
+                });
+
+            productos = JSON.parse(productos);
+            let listaProductos = "<option value='0' hidden selected >Productos</option>";
+            if (productos.success) {
+                productos.data.forEach(element => {
+                    listaProductos += `<option value='${element.cod_prod}'>${element.cod_prod}</option>`;
+                });
+            }
+            const selectElement2 = document.getElementById('cod_prod');
+            selectElement2.innerHTML = listaProductos;
+            $('#cod_prod').select2();
+            $('#talla').select2();
+
+        });
+
+        agregarProducto = () => {
+            const table = document.getElementById('tablaProductos');
+            const bodega = document.getElementById("bodega");
+            const nombreBodega = bodega.options[bodega.selectedIndex].textContent;
+
+            const codProd = document.getElementById("cod_prod");
+            const talla = document.getElementById("talla");
+            const cantidad = document.getElementById("cantidad");
+
+            if (bodega.value == 0) {
+                alert("Selecciones una bodega");
+                return;
+            } else if (cod_prod.value == 0) {
+                alert("Selecciones un producto");
+                return;
+            } else if (talla.value == 0) {
+                alert("Selecciones una talla");
+                return;
+            } else if (cantidad.value <= 0) {
+                alert("La cantidad debe ser mayor que 0");
+                return;
+            }
+            const html = `
+            <tr>
+                <th scope="row">${contador}</th>
+                <td class="bedagasTabla" value="${bodega.value}">${nombreBodega}</td>
+                <td class="productosTabla">${codProd.value}</td>
+                <td class="tallasTabla">${talla.value}</td>
+                <td class="cantidadTabla">${cantidad.value}</td>
+                <td><a onClick="remover(this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-delete align-middle me-2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></a></td>
+            </tr>`;
+            table.innerHTML += html
+            contador++;
+
+            codProd.value = 0;
+            talla.value = 0;
+            cantidad.value = '';
+        }
+
+        remover = (element) => {
+            const table = element.parentElement.parentElement.parentElement;
+            const row = element.parentElement.parentElement;
+            if (table) {
+                table.removeChild(row);
+            }
+        }
+
+        guardarInventario = async () => {
+            const types = ['.bedagasTabla', '.productosTabla', '.tallasTabla', '.cantidadTabla'];
+            const data = ['bodegas', 'productos', 'tallas', 'cantidades'];
+            const dataArrays = [[], [], [], []];
+            var formData = new FormData();
+
+            for (let i = 0; i < types.length; i++) {
+                const elementos = document.querySelectorAll(types[i]);
+                for (const elemento of elementos) {
+                    if (types[i] == ".bedagasTabla") {
+                        formData.append(`${data[i]}[]`, elemento.getAttribute('value'));
+                    } else {
+                        formData.append(`${data[i]}[]`, elemento.textContent);
+                    }
+                }
+            }
+
+            // const [listaBodegas, listaProductos, listaTallas, listaCantidades] = dataArrays;
+            const headers = new Headers({
+                'Authorization': `Token ${localStorage.getItem('token')}`
+            });
+            let response = await fetch(`${url}/api/guardarInventario/`, {
+                method: 'POST',
+                body: formData,
+                headers:headers
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.text()
+                    } else {
+                        throw "Error en la llamada";
+                    }
+
+                })
+                .then(function (texto) {
+                    return texto;
+                })
+                .catch(function (err) {
+                    var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                    return respuesta;
+                });
+            response = JSON.parse(response);
+            if (response.success) {
+                alert(response.message);
+                location.href = '/inventario/';
+
+            } else {
+                alert(response.message);
+            }
+
+
+        }
+    </script>
+    {%endblock%}

@@ -1,0 +1,272 @@
+{%extends "../base.html"%}
+{% load static %}
+
+{%block template%}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<div class="container">
+	<div class="modal" id="modalVentas" name="modalVentas" data-bs-backdrop="static" data-bs-keyboard="false"
+		tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Vender</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form action="" id="ventasForm" class="d-flex">
+						<div class="row">
+							<div class="col-5">
+								<label for="">Cantidad a Vender:</label>
+							</div>
+							<div class="col-7">
+								<input name="cantidad" id="cantidad" class="form-control" type="number"
+									placeholder="canitdad" required />
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="submit" data-bs-dismiss="modal"
+						onclick="venderProducto()">Vender
+						Producto</button>
+					<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<h3 class="h3">Buscar artículo</h3>
+	<div class="row">
+		<div class="col">
+			<select class="form-select" id="bodega" name="bodega">
+				<option hidden selected>Bodega</option>
+			</select>
+		</div>
+		<div class="col">
+			<select class="form-select" id="productos" name="productos">
+				<option hidden selected>Producto</option>
+				<option>color 1</option>
+				<option>color 2</option>
+				<option>color 3</option>
+			</select>
+		</div>
+		<div class="col">
+			<select class="form-select" id="talla" name="talla">
+				<option hidden selected value="0">Tallas</option>
+				<option>35</option>
+				<option>36</option>
+				<option>37</option>
+				<option>38</option>
+				<option>39</option>
+				<option>40</option>
+				<option>41</option>
+				<option>42</option>
+				<option>43</option>
+			</select>
+		</div>
+
+		<div class="col">
+			<button class="btn btn-outline-secondary w-50" onclick="buscarProducto()">Buscar</button>
+		</div>
+	</div>
+	<hr>
+	<h3 class="font-weight-bold">Resultados:</h3>
+	<div class="d-flex" style="display: none !important;" id="resultado">
+
+	</div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+	integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+
+	const currentUrl = window.location.href;
+	const urlBase = currentUrl.split("/")[2];
+	const protocolo = currentUrl.split(":")[0];
+	const url = protocolo + "://" + urlBase;
+	let productoVenta = {};
+	let stock = 0;
+	document.addEventListener("DOMContentLoaded", async function () {
+
+		const headers = new Headers({
+			'Authorization': `Token ${localStorage.getItem('token')}`
+		});
+		let bodegas = await fetch(`${url}/api/bodegas`, {
+			method: 'GET',
+			headers: headers
+		})
+			.then(function (response) {
+				if (response.ok) {
+					return response.text()
+				} else {
+					throw "Error en la llamada";
+				}
+
+			})
+			.then(function (texto) {
+				return texto;
+			})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		bodegas = JSON.parse(bodegas);
+		let listaBodegas = "<option value='0' hidden selected>Bodegas</option>";
+		if (bodegas.success) {
+			bodegas.data.forEach(element => {
+				listaBodegas += `<option value='${element.id_sucursal}'>${element.nom_sucursal}</option>`;
+			});
+		}
+		const selectElement = document.getElementById('bodega');
+		selectElement.innerHTML = listaBodegas;
+
+
+		let productos = await fetch(`${url}/api/productos`, {
+			method: 'GET',
+			headers: headers
+
+		})
+			.then(function (response) {
+				if (response.ok) {
+					return response.text()
+				} else {
+					throw "Error en la llamada";
+				}
+
+			})
+			.then(function (texto) {
+				return texto;
+			})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+
+		productos = JSON.parse(productos);
+		let listaProductos = "<option value='0' hidden selected>Productos</option>";
+		if (productos.success) {
+			productos.data.forEach(element => {
+				listaProductos += `<option value='${element.cod_prod}'>${element.cod_prod}</option>`;
+			});
+		}
+		const selectElement2 = document.getElementById('productos');
+		selectElement2.innerHTML = listaProductos;
+		$('#productos').select2();
+		$('#talla').select2();
+
+
+	});
+	buscarProducto = async () => {
+		const resultado = document.getElementById("resultado");
+		const bodega = document.getElementById("bodega");
+		const productos = document.getElementById("productos");
+		const talla = document.getElementById("talla");
+		if (bodega == 0) {
+			alert("Seleccione una bodega");
+			return;
+		} else if (productos == 0) {
+			alert("Seleccione un producto");
+			return;
+		} else if (talla == 0) {
+			alert("Seleccione una talla");
+			return;
+		}
+		const headers = new Headers({
+			'Authorization': `Token ${localStorage.getItem('token')}`
+		});
+		const request = `${url}/api/buscar/?id_sucursal=${bodega.value}&cod_prod=${productos.value}&talla=${talla.value}`;
+		let inventario = await fetch(request, {
+			method: 'GET',
+			headers: headers
+
+		}).then(function (response) {
+			if (response.ok) {
+				return response.text()
+			} else {
+				throw "Error en la llamada";
+			}
+		}).then(function (texto) {
+			return texto;
+		})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		inventario = JSON.parse(inventario);
+		let contenido = ``;
+		if (inventario.success) {
+			inventario = inventario.data[0];
+			stock = inventario.total;
+
+			productoVenta = {
+				"id_sucursal": inventario.id_sucursal,
+				"cod_prod": inventario.cod_prod,
+				"talla": inventario.talla,
+				"total": 0,
+				"tipo": "descarga"
+			}
+			productoVent = {
+				"id_sucursal": inventario.id_sucursal,
+				"cod_prod": inventario.cod_prod,
+				"talla": inventario.talla,
+				"total": 0,
+				"tipo": "descarga"
+			}
+			contenido += `
+					<div class="mr-4 d-flex flex-column w-50">
+						<span class="h3 mt-3">Nombre: ${inventario.nombre}</span>
+						<span class="h3 mt-3">Talla: ${inventario.talla}</span>
+						<span class="h3 mt-3">Color: ${inventario.color}</span>
+						<span class="h3 mt-3">Almacen: ${inventario.bodega}</span>
+						<span class="h3 mt-3">Cantidad disponibles: ${inventario.total}</span>
+						<span class="h3 mt-3">Precio: $${inventario.precio}</span>
+					</div>
+					<div class="d-flex flex-column w-50">
+						<span class="h3 mt-3">Marca: ${inventario.marca}</span>
+						<img src="${inventario.foto}" alt="zapatos" class="w-50">
+						<button type="submit" class="btn btn-outline-secondary text-dark w-50 h-25 mt-3"  data-bs-toggle="modal" data-bs-target="#modalVentas">Vender</button>
+					</div>`
+		}
+		resultado.innerHTML = contenido;
+		resultado.style.display = "block"
+	}
+	const venderProducto = async () => {
+		const cantidad = document.getElementById("cantidad").value;
+		if (cantidad > stock) {
+			alert("No hay suficiente stock para realizar esta venta");
+			return;
+		}
+		const venta = {
+			...productoVenta,
+			total: cantidad
+		}
+
+		console.log(venta);
+		const request = `${url}/api/venderInventario/`;
+		const headers = new Headers({
+			'Authorization': `Token ${localStorage.getItem('token')}`,
+			'Content-Type': 'application/json'
+		});
+		let response = await fetch(request, {
+			method: 'POST',
+			body: JSON.stringify(venta),
+			headers: headers
+		}).then(function (response) {
+			if (response.ok) {
+				return response.text()
+			} else {
+				throw "Error en la llamada";
+			}
+		}).then(function (texto) {
+			return texto;
+		})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+		response = JSON.parse(response);
+		alert(response.message);
+		location.href = '/buscar/';
+
+	}
+</script>
+{% endblock %}
