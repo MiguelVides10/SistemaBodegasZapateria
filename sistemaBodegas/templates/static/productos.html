@@ -24,15 +24,15 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <div class="d-flex">
+                        <form id="marcasForm" class="d-flex">
                             <div class="form-floating me-3">
                                 <input name="nombre_marca" id="nombre_marca" class="form-control" type="text"
                                     placeholder="Stock minimo" required />
                                 <label for="nombre_marca">Nombre de la Marca</label>
                             </div>
-                            <button class="btn btn-secondary" onclick="guardarMarca()" >Agregar
+                            <button class="btn btn-secondary" type="submit" >Agregar
                                 Marca</button>
-                            </div>
+                        </form>
                         <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <form action="" id="catForm" class="d-flex">
+                        <form  id="catForm" class="d-flex">
                             <div class="form-floating me-3">
                                 <input name="categoria" id="categoria" class="form-control" type="text" required />
                                 <label for="categoria">Categoría</label>
@@ -91,6 +91,46 @@
     const urlBase = currentUrl.split("/")[2];
     const protocolo = currentUrl.split(":")[0];
     const url = protocolo + "://" + urlBase;
+
+    async function guardarMarca() {
+        const marca = document.getElementById("nombre_marca").value;
+        const data = {
+            "nombre_marca": marca,
+        }
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        });
+
+        let response = await fetch(`${url}/api/guardarMarca/`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+        } else {
+            alert(response.message);
+        }
+        window.location.href = "/productos/";
+
+    }
 
     document.addEventListener("DOMContentLoaded", async function () {
         const headers = new Headers({
@@ -230,6 +270,7 @@
         }
         const tablaMarca = document.getElementById("marcasTabla");
         tablaMarca.innerHTML = tablaMarcas;
+
     });
 
     async function guardarCategoria() {
@@ -273,56 +314,14 @@
 
     }
 
-    async function guardarMarca() {
-        
-        const marca = document.getElementById("nombre_marca").value;
-        const data = {
-            "nombre_marca": marca,
-        }
-        const headers = new Headers({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        });
-        console.log(data);
-        let response = await fetch(`${url}/api/guardarMarca/`, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: headers
-        })
-            .then(function (response) {
-                if (response.ok) {
-                    return response.text()
-                } else {
-                    throw "Error en la llamada";
-                }
-
-            })
-            .then(function (texto) {
-                return texto;
-            })
-            .catch(function (err) {
-                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
-                return respuesta;
-            });
-        response = JSON.parse(response);
-        if (response.success) {
-            alert(response.message);
-        } else {
-            alert(response.message);
-        }
-        window.location.href = "/productos/";
-
-    }
-
     const formMarca = document.getElementById("marcasForm");
-    formMarca.addEventListener('submit', function(event){
-        event.prevenDefault();
-        alert("vsth");
-        guardarMarca();
+        formMarca.addEventListener('submit', function (event){
+            event.preventDefault();
+            guardarMarca();
     });
-
+    
     const formCat = document.getElementById("catForm");
-    formCat.addEventListener('submit', function(event){
+    formCat.addEventListener('submit', function (event){
         event.preventDefault();
         guardarCategoria();
     });

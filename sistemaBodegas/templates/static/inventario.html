@@ -4,7 +4,50 @@
 {%block template%}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <div class="container-fluid p-0">
-    <h3>Agregar productos al inventario</h3>
+    <h3>Datos de la factura</h3>
+    <form action="" id="productosForm">
+        <div class="d-flex  ">
+            div
+          <div class="row">
+            <div class="form-floating mb-3">
+              <input name="cod_prod" id="cod_prod" class="form-control" type="text" placeholder="Codigo producto" required
+                data-tipo="codigo" />
+              <label for="cod_prod">Codigo del producto</label>
+            </div>
+            <div class="form-floating mb-3">
+              <select class="form-select" id="id_categoria" name="id_categoria">
+              </select>
+              <label for="id_categoria">Categorías</label>
+            </div>
+            <div class="form-floating mb-3">
+              <input name="color" id="color" class="form-control" type="text" placeholder="Stock minimo" />
+              <label for="color">Color</label>
+            </div>
+            <input type="file" class="form-control" id="foto" name="foto">
+          </div>
+          <div class="d-flex flex-column w-50">
+            <div class="form-floating mb-3">
+              <input name="descripcion" id="descripcion" class="form-control" type="text" placeholder="Descripcion del producto"
+                required />
+              <label for="descripcion">Descripcion del producto</label>
+            </div>
+            <div class="form-floating mb-3">
+              <select class="form-select" id="id_marca" name="id_marca">
+              </select>
+              <label for="id_marca">Marca</label>
+            </div>
+            <div class="form-floating mb-3">
+              <input name="precio" id="precio" class="form-control" type="number" placeholder="Precio unitario:"
+                data-tipo="precio" />
+              <label for="precio">Precio</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <button type="submit" class="btn btn-secondary mt-4 w-50">Guardar producto</button>
+        </div>
+      </form>
+    <h3>Productos a ingresar</h3>
     <hr>
     <div class="row mb-4">
         <div class="col">
@@ -20,15 +63,31 @@
         <div class="col">
             <select class="form-select" id="talla" name="talla">
                 <option hidden selected value="0">Tallas</option>
-                <option>35</option>
-                <option>36</option>
-                <option>37</option>
-                <option>38</option>
-                <option>39</option>
-                <option>40</option>
-                <option>41</option>
-                <option>42</option>
-                <option>43</option>
+                <option>21</option>
+				<option>22</option>
+				<option>23</option>
+				<option>24</option>
+				<option>25</option>
+				<option>26</option>
+				<option>27</option>
+				<option>28</option>
+				<option>29</option>
+				<option>30</option>
+				<option>31</option>
+				<option>32</option>
+				<option>33</option>
+				<option>34</option>
+				<option>35</option>
+				<option>36</option>
+				<option>37</option>
+				<option>38</option>
+				<option>39</option>
+				<option>40</option>
+				<option>41</option>
+				<option>42</option>
+				<option>43</option>
+				<option>44</option>
+				<option>45</option>
             </select>
         </div>
         <div class="col">
@@ -60,7 +119,7 @@
         <div class="col-9"></div>
         <div class="col-3">
             <div class="col">
-                <button class="btn btn-secondary h-75" onclick="guardarInventario()">Guardar inventario</button>
+                <button class="btn btn-secondary h-75" onclick="guardarInventario()">Guardar factura</button>
             </div>
         </div>
     </div>
