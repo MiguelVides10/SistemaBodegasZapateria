@@ -6,47 +6,37 @@
 <div class="container-fluid p-0">
     <h3>Datos de la factura</h3>
     <form action="" id="productosForm">
-        <div class="d-flex  ">
-            div
-          <div class="row">
-            <div class="form-floating mb-3">
-              <input name="cod_prod" id="cod_prod" class="form-control" type="text" placeholder="Codigo producto" required
-                data-tipo="codigo" />
-              <label for="cod_prod">Codigo del producto</label>
+        <div class="row mb-3">
+            <div class="col-3">
+                <div class="form-floating mb-3">
+                    <input name="numero_factura" id="numero_factura" class="form-control" type="text"
+                        placeholder="Numero de factura fiscal" required />
+                    <label for="numero_factura">Numero de factura fiscal</label>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-              <select class="form-select" id="id_categoria" name="id_categoria">
-              </select>
-              <label for="id_categoria">Categorías</label>
+            <div class="col-3">
+                <div class="form-floating mb-3">
+                    <input name="fecha_fact" id="fecha_fact" class="form-control" type="text"
+                        placeholder="Fecha de la factura" required />
+                    <label for="fecha_fact">Fecha</label>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-              <input name="color" id="color" class="form-control" type="text" placeholder="Stock minimo" />
-              <label for="color">Color</label>
+            <div class="col-3">
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="id_proveedor" name="id_proveedor">
+                    </select>
+                    <label for="id_proveedor">Proveedor</label>
+                </div>
             </div>
-            <input type="file" class="form-control" id="foto" name="foto">
-          </div>
-          <div class="d-flex flex-column w-50">
-            <div class="form-floating mb-3">
-              <input name="descripcion" id="descripcion" class="form-control" type="text" placeholder="Descripcion del producto"
-                required />
-              <label for="descripcion">Descripcion del producto</label>
+            <div class="col-3">
+                <div class="form-floating mb-3">
+                    <input name="descuento" id="descuento" class="form-control" type="number" placeholder="Descuento"
+                        required value="0"/>
+                    <label for="descuento">Descuento</label>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-              <select class="form-select" id="id_marca" name="id_marca">
-              </select>
-              <label for="id_marca">Marca</label>
-            </div>
-            <div class="form-floating mb-3">
-              <input name="precio" id="precio" class="form-control" type="number" placeholder="Precio unitario:"
-                data-tipo="precio" />
-              <label for="precio">Precio</label>
-            </div>
-          </div>
         </div>
-        <div class="col-6">
-          <button type="submit" class="btn btn-secondary mt-4 w-50">Guardar producto</button>
-        </div>
-      </form>
+    </form>
     <h3>Productos a ingresar</h3>
     <hr>
     <div class="row mb-4">
@@ -64,34 +54,37 @@
             <select class="form-select" id="talla" name="talla">
                 <option hidden selected value="0">Tallas</option>
                 <option>21</option>
-				<option>22</option>
-				<option>23</option>
-				<option>24</option>
-				<option>25</option>
-				<option>26</option>
-				<option>27</option>
-				<option>28</option>
-				<option>29</option>
-				<option>30</option>
-				<option>31</option>
-				<option>32</option>
-				<option>33</option>
-				<option>34</option>
-				<option>35</option>
-				<option>36</option>
-				<option>37</option>
-				<option>38</option>
-				<option>39</option>
-				<option>40</option>
-				<option>41</option>
-				<option>42</option>
-				<option>43</option>
-				<option>44</option>
-				<option>45</option>
+                <option>22</option>
+                <option>23</option>
+                <option>24</option>
+                <option>25</option>
+                <option>26</option>
+                <option>27</option>
+                <option>28</option>
+                <option>29</option>
+                <option>30</option>
+                <option>31</option>
+                <option>32</option>
+                <option>33</option>
+                <option>34</option>
+                <option>35</option>
+                <option>36</option>
+                <option>37</option>
+                <option>38</option>
+                <option>39</option>
+                <option>40</option>
+                <option>41</option>
+                <option>42</option>
+                <option>43</option>
+                <option>44</option>
+                <option>45</option>
             </select>
         </div>
         <div class="col">
             <input type="number" class="form-control" id="cantidad" name="cantidad" placeholder="Cantidad" />
+        </div>
+        <div class="col">
+            <input type="number" class="form-control" id="costo" name="costo" placeholder="costo" />
         </div>
         <div class="col">
             <div>
@@ -108,11 +101,33 @@
                     <th scope="col">Codigo</th>
                     <th scope="col">Talla</th>
                     <th scope="col">Cantidad</th>
+                    <th scope="col">Costo</th>
+                    <th scope="col">Total</th>
                     <th scope="col">Eliminar</th>
                 </tr>
             </thead>
             <tbody id="tablaProductos">
             </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col">Total</th>
+                    <th scope="col" id="totalTabla">$0.00</th>
+                </tr>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col">Total con descuento</th>
+                    <th scope="col" id="totalDescTabla">$0.00</th>
+                </tr>
+            </tfoot>
         </table>
     </div>
     <div class="row">
@@ -128,6 +143,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         let contador = 1;
+        let total = 0;
         const currentUrl = window.location.href;
         const urlBase = currentUrl.split("/")[2];
         const protocolo = currentUrl.split(":")[0];
@@ -138,7 +154,7 @@
             });
             let bodegas = await fetch(`${url}/api/bodegas`, {
                 method: 'GET',
-                headers:headers
+                headers: headers
             })
                 .then(function (response) {
                     if (response.ok) {
@@ -165,11 +181,39 @@
             const selectElement = document.getElementById('bodega');
             selectElement.innerHTML = listaBodegas;
 
+            let proveedores = await fetch(`${url}/api/proveedores`, {
+                method: 'GET',
+                headers: headers
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        return response.text()
+                    } else {
+                        throw "Error en la llamada";
+                    }
 
+                })
+                .then(function (texto) {
+                    return texto;
+                })
+                .catch(function (err) {
+                    var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                    return respuesta;
+                });
+
+            proveedores = JSON.parse(proveedores);
+            let listaProveedores = "<option value='0' hidden selected>Seleccione una proveedor</option>";
+            if (proveedores.success) {
+                proveedores.data.forEach(element => {
+                    listaProveedores += `<option value='${element.cod_proveedor}'>${element.nom_proveedor}</option>`;
+                });
+            }
+            const selectProveedores = document.getElementById('id_proveedor');
+            selectProveedores.innerHTML = listaProveedores;
 
             let productos = await fetch(`${url}/api/productos`, {
                 method: 'GET',
-                headers:headers
+                headers: headers
             })
                 .then(function (response) {
                     if (response.ok) {
@@ -209,6 +253,8 @@
             const codProd = document.getElementById("cod_prod");
             const talla = document.getElementById("talla");
             const cantidad = document.getElementById("cantidad");
+            const costo = document.getElementById("costo");
+            const descuento = document.getElementById("descuento");
 
             if (bodega.value == 0) {
                 alert("Selecciones una bodega");
@@ -222,7 +268,17 @@
             } else if (cantidad.value <= 0) {
                 alert("La cantidad debe ser mayor que 0");
                 return;
+            }else if (costo.value <= 0) {
+                alert("El costo debe ser mayor que 0");
+                return;
             }
+            const totalActual = cantidad.value * costo.value;
+            total = total + totalActual
+            console.log("TOtal:"+total);
+            console.log("desc:"+descuento.value);
+            const totalConDecuento = (descuento.value > 0) ? (total - (total * (descuento.value/100))) : total;
+            console.log("desc:"+totalConDecuento);
+
             const html = `
             <tr>
                 <th scope="row">${contador}</th>
@@ -230,11 +286,14 @@
                 <td class="productosTabla">${codProd.value}</td>
                 <td class="tallasTabla">${talla.value}</td>
                 <td class="cantidadTabla">${cantidad.value}</td>
+                <td class="costoTabla">${costo.value}</td>
+                <td class="totales">${totalActual}</td>
                 <td><a onClick="remover(this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-delete align-middle me-2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></a></td>
             </tr>`;
             table.innerHTML += html
             contador++;
-
+            $("#totalTabla").html('$'+parseFloat(total).toFixed(2));
+            $("#totalDescTabla").html('$'+parseFloat(totalConDecuento).toFixed(2));
             codProd.value = 0;
             talla.value = 0;
             cantidad.value = '';
@@ -243,19 +302,27 @@
         remover = (element) => {
             const table = element.parentElement.parentElement.parentElement;
             const row = element.parentElement.parentElement;
+            const valor = row.querySelector('.totales').textContent;
+            const descuento = document.getElementById("descuento");
+
             if (table) {
+                total = total - valor;
+                const totalConDecuento = (descuento.value > 0) ? (total - (total * (descuento.value/100))) : total;
+
+                $("#totalTabla").html('$'+parseFloat(total).toFixed(2));
+                $("#totalDescTabla").html('$'+parseFloat(totalConDecuento).toFixed(2));
                 table.removeChild(row);
             }
         }
 
         guardarInventario = async () => {
-            const types = ['.bedagasTabla', '.productosTabla', '.tallasTabla', '.cantidadTabla'];
-            const data = ['bodegas', 'productos', 'tallas', 'cantidades'];
-            const dataArrays = [[], [], [], []];
+            const types = ['.bedagasTabla', '.productosTabla', '.tallasTabla', '.cantidadTabla', '.costoTabla', '.totales'];
+            const data = ['bodegas', 'productos', 'tallas', 'cantidades', 'costos', 'totales'];
             var formData = new FormData();
 
             for (let i = 0; i < types.length; i++) {
                 const elementos = document.querySelectorAll(types[i]);
+                console.log("ADDING:"+types[i]);
                 for (const elemento of elementos) {
                     if (types[i] == ".bedagasTabla") {
                         formData.append(`${data[i]}[]`, elemento.getAttribute('value'));
@@ -264,6 +331,18 @@
                     }
                 }
             }
+            const descuento = document.getElementById("descuento");
+            const totalConDecuento = (descuento.value > 0) ? (total - (total * (descuento.value/100))) : total;
+            const numfac = document.getElementById("numero_factura").value;
+            const fecha = document.getElementById("fecha_fact").value;
+            const id_proveedor= document.getElementById("id_proveedor").value;
+
+            formData.append("numfac",numfac)
+            formData.append("fecha",fecha)
+            formData.append("id_proveedor",id_proveedor)
+            formData.append("descuento",descuento.value)
+            formData.append("total",total)
+            formData.append("totalDesc",totalConDecuento)
 
             // const [listaBodegas, listaProductos, listaTallas, listaCantidades] = dataArrays;
             const headers = new Headers({
@@ -272,7 +351,7 @@
             let response = await fetch(`${url}/api/guardarInventario/`, {
                 method: 'POST',
                 body: formData,
-                headers:headers
+                headers: headers
             })
                 .then(function (response) {
                     if (response.ok) {

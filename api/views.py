@@ -6,8 +6,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
-from .models import Categorias,Productos,Marcas,Bodegas,ProductosBodegas
-from .serializers import CategoriasSerializer,ProductosSerializer,MarcasSerializer,BodegasSerializer,ProductosBodegasSerializer
+from .models import Categorias,Productos,Marcas,Bodegas,ProductosBodegas,Proveedores
+from .serializers import CategoriasSerializer,ProductosSerializer,MarcasSerializer,BodegasSerializer,ProductosBodegasSerializer,ProveedoresSerializer
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -87,6 +87,22 @@ class ListaMarcas(APIView):
                 "data": []
             }
         return Response(response_data)
+
+class ListaProveedores(APIView):
+    def get(self, request, *args, **kwargs):
+        proveedores = Proveedores.objects.all()
+        serializer = ProveedoresSerializer(proveedores, many=True)
+        if proveedores.exists():
+            response_data = {
+                "success": True,
+                "data": serializer.data
+            }
+        else:
+            response_data = {
+                "success": False,
+                "data": []
+            }
+        return Response(response_data)
     
 class ProductoConMarcaListView(generics.ListAPIView):
     authentication_classes = [TokenAuthentication]
@@ -135,13 +151,26 @@ class InventarioCreateView(generics.CreateAPIView):
     serializer_class = ProductosBodegasSerializer
     def post(self, request, *args, **kwargs):
         if request.method == 'POST':
+            num_fact = request.POST.getlist('numfac')
+            fecha = request.POST.getlist('fecha')
+            id_proveedor = request.POST.getlist('id_proveedor')
+            descuento = request.POST.getlist('descuento')
+            total = request.POST.getlist('total')
+            totalDesc = request.POST.getlist('totalDesc')
+            consulta = 'INSERT into facturas set num_fact = %s,descuento = %s, cod_proveedor = %s, total=%s, totalDesc = %s'
+            parametros = (num_fact,descuento,id_proveedor,total,totalDesc)
+            with connection.cursor() as cursor:
+                cursor.execute(consulta, parametros)
+
             bodegas = request.POST.getlist('bodegas[]')
             productos = request.POST.getlist('productos[]')
             tallas = request.POST.getlist('tallas[]')
             cantidades = request.POST.getlist('cantidades[]')
+            costos = request.POST.getlist('costos[]')
+            totales = request.POST.getlist('totales[]')
             for index, item in enumerate(productos):
-                consulta = "INSERT INTO sistema_bodegas.productos_bodegas (id_sucursal, cod_prod, talla, total, tipo) VALUES(%s, %s, %s, %s, 'carga')"
-                parametros = (bodegas[index],item,tallas[index],cantidades[index])
+                consulta = "INSERT INTO sistema_bodegas.productos_bodegas (id_sucursal, cod_prod, talla, cantidad,costo,total,tipo) VALUES(%s, %s, %s, %s, %s, %s, 'carga')"
+                parametros = (bodegas[index],item,tallas[index],cantidades[index],costos[index],totales[index])
                 with connection.cursor() as cursor:
                     cursor.execute(consulta, parametros)
             return Response({"success": True, "message": "Registros insertados"}, status=status.HTTP_201_CREATED)
@@ -162,6 +191,18 @@ class MarcasCreateView(generics.CreateAPIView):
             return Response({"success": True, "message": "Marca creada correctamente"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"success": False, "message": "No se pudo crear la Marca", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class ProveedoresCreateView(generics.CreateAPIView):
+    queryset = Proveedores.objects.all()
+    serializer_class = ProveedoresSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response({"success": True, "message": "Proveedor creado correctamente"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"success": False, "message": "No se pudo crear el proveedor", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class CategoriasCreateView(generics.CreateAPIView):
     queryset = Categorias.objects.all()

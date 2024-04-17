@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Bodegas,Categorias,Productos,ProductosBodegas,Marcas
+from .models import Bodegas,Categorias,Productos,ProductosBodegas,Marcas,Proveedores
 
 class BodegasSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,6 +14,11 @@ class CategoriasSerializer(serializers.ModelSerializer):
 class MarcasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Marcas
+        fields = '__all__'
+
+class ProveedoresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Proveedores
         fields = '__all__'
 class ProductosSerializer(serializers.ModelSerializer):
     class Meta:

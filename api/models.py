@@ -77,6 +77,16 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class AuthtokenToken(models.Model):
+    key = models.CharField(primary_key=True, max_length=40)
+    created = models.DateTimeField()
+    user = models.OneToOneField(AuthUser, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'authtoken_token'
+
+
 class Bodegas(models.Model):
     id_sucursal = models.AutoField(primary_key=True)
     nom_sucursal = models.CharField(max_length=100, blank=True, null=True)
@@ -144,6 +154,28 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Facturas(models.Model):
+    idfactura = models.AutoField(primary_key=True)
+    num_fact = models.CharField(max_length=30, blank=True, null=True)
+    fecha_fact = models.DateField(blank=True, null=True)
+    cod_proveedor = models.IntegerField(blank=True, null=True)
+    id_inventario = models.IntegerField(blank=True, null=True)
+    anulada = models.SmallIntegerField(blank=True, null=True)
+    credito = models.SmallIntegerField(blank=True, null=True)
+    descuento = models.FloatField(blank=True, null=True)
+    iddevolucion = models.IntegerField(blank=True, null=True)
+    id_usuario = models.IntegerField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(blank=True, null=True)
+    id_sucursal = models.IntegerField(blank=True, null=True)
+    fecha_anulada = models.DateTimeField(blank=True, null=True)
+    total = models.FloatField(blank=True, null=True)
+    totaldesc = models.FloatField(db_column='totalDesc', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'facturas'
+
+
 class Marcas(models.Model):
     id_marca = models.AutoField(primary_key=True)
     nombre_marca = models.CharField(max_length=100, blank=True, null=True)
@@ -154,13 +186,14 @@ class Marcas(models.Model):
 
 
 class Productos(models.Model):
-    cod_prod = models.CharField(primary_key=True, max_length=50)
+    cod_prod = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=200, blank=True, null=True)
     id_marca = models.IntegerField(blank=True, null=True)
-    color = models.CharField(max_length=50, blank=True, null=True)
+    color = models.CharField(max_length=100, blank=True, null=True)
     id_categoria = models.IntegerField(blank=True, null=True)
     foto = models.TextField(blank=True, null=True)
     precio = models.FloatField(blank=True, null=True)
+    id_producto = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False
@@ -174,7 +207,18 @@ class ProductosBodegas(models.Model):
     talla = models.FloatField(blank=True, null=True)
     total = models.FloatField(blank=True, null=True)
     tipo = models.CharField(max_length=8, blank=True, null=True)
+    costo = models.FloatField(blank=True, null=True)
+    cantidad = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'productos_bodegas'
+
+
+class Proveedores(models.Model):
+    cod_proveedor = models.AutoField(primary_key=True)
+    nom_proveedor = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'proveedores'

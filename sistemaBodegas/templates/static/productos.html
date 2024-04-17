@@ -30,8 +30,39 @@
                                     placeholder="Stock minimo" required />
                                 <label for="nombre_marca">Nombre de la Marca</label>
                             </div>
-                            <button class="btn btn-secondary" type="submit" >Agregar
+                            <button class="btn btn-secondary" type="submit">Agregar
                                 Marca</button>
+                        </form>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalProveedores">
+            Proveedores
+        </button>
+        <div class="modal fade" id="modalProveedores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Proveedores</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="proveedoresTabla">
+
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="proovedorForm" class="d-flex">
+                            <div class="form-floating me-3">
+                                <input name="nombre_proveedor" id="nombre_proveedor" class="form-control" type="text"
+                                    placeholder="Stock minimo" required />
+                                <label for="nombre_proveedor">Nombre del proveedor</label>
+                            </div>
+                            <button class="btn btn-secondary" type="submit">Agregar
+                                Proveedor</button>
                         </form>
                         <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
                     </div>
@@ -56,7 +87,7 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <form  id="catForm" class="d-flex">
+                        <form id="catForm" class="d-flex">
                             <div class="form-floating me-3">
                                 <input name="categoria" id="categoria" class="form-control" type="text" required />
                                 <label for="categoria">Categoría</label>
@@ -103,6 +134,46 @@
         });
 
         let response = await fetch(`${url}/api/guardarMarca/`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+        } else {
+            alert(response.message);
+        }
+        window.location.href = "/productos/";
+
+    }
+
+    async function guardarProoveedor() {
+        const proveedor = document.getElementById("nombre_proveedor").value;
+        const data = {
+            "nom_proveedor": proveedor,
+        }
+        const headers = new Headers({
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+        });
+
+        let response = await fetch(`${url}/api/guardarProveedor/`, {
             method: 'POST',
             body: JSON.stringify(data),
             headers: headers
@@ -270,6 +341,44 @@
         }
         const tablaMarca = document.getElementById("marcasTabla");
         tablaMarca.innerHTML = tablaMarcas;
+       
+        let proveedores = await fetch(`${url}/api/proveedores`, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.text()
+                } else {
+                    throw "Error en la llamada";
+                }
+
+            })
+            .then(function (texto) {
+                return texto;
+            })
+            .catch(function (err) {
+                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+                return respuesta;
+            });
+
+        proveedores = JSON.parse(proveedores);
+        let tablaProveedores = `<thead>
+                            <tr>
+                                <th>Proveedores</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+        if (proveedores.success) {
+            proveedores.data.forEach(element => {
+                tablaProveedores += `<tr>
+                                <td>${element.nom_proveedor} </td>
+                            </tr>
+                            </tbody>`
+            });
+        }
+        const tablaProveedor = document.getElementById("proveedoresTabla");
+        tablaProveedor.innerHTML = tablaProveedores;
 
     });
 
@@ -315,13 +424,19 @@
     }
 
     const formMarca = document.getElementById("marcasForm");
-        formMarca.addEventListener('submit', function (event){
-            event.preventDefault();
-            guardarMarca();
+    formMarca.addEventListener('submit', function (event) {
+        event.preventDefault();
+        guardarMarca();
     });
-    
+
+    const formProveedor = document.getElementById("proovedorForm");
+    formProveedor.addEventListener('submit', function (event) {
+        event.preventDefault();
+        guardarProoveedor();
+    });
+
     const formCat = document.getElementById("catForm");
-    formCat.addEventListener('submit', function (event){
+    formCat.addEventListener('submit', function (event) {
         event.preventDefault();
         guardarCategoria();
     });
@@ -330,21 +445,21 @@
         window.location.href = `${url}/editar/${cod_prod}`
     }
 
-    async function eliminarProducto(cod_prod){
+    async function eliminarProducto(cod_prod) {
         const headers = new Headers({
-        'Authorization': `Token ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
         });
-        let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`,{
-            method : 'DELETE',
+        let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`, {
+            method: 'DELETE',
             headers: headers
         }).then(function (response) {
-                if (response.ok) {
+            if (response.ok) {
                 return response.text()
-                } else {
+            } else {
                 throw "Error en la llamada";
             }
-            })
+        })
             .then(function (texto) {
                 return texto;
             })
@@ -352,13 +467,13 @@
                 var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
                 return respuesta;
             });
-            response = JSON.parse(response);
-            if (response.success) {
-                alert(response.message);
-                window.location.href = "/productos/";
-            } else {
-                alert(response.message);
-            }
+        response = JSON.parse(response);
+        if (response.success) {
+            alert(response.message);
+            window.location.href = "/productos/";
+        } else {
+            alert(response.message);
+        }
     }
     function eliminar(cod_prod) {
         eliminarProducto(cod_prod);
