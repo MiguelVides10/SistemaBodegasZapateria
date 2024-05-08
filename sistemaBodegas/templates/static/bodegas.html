@@ -1,0 +1,402 @@
+{% extends "../base.html"%} {% load static %} {%block template%}
+<link
+  href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css"
+  rel="stylesheet"
+/>
+
+<div class="container">
+  <div class="d-flex mb-4">
+    <a class="btn btn-secondary me-3" href="/productos/"
+      >&#10232; Volver a Productos</a
+    >
+  </div>
+  <div class="container">
+    <form action="" id="bodegaform">
+      <div class="d-flex">
+        <div class="me-4 d-flex flex-column w-50">
+          <div class="form-floating mb-3">
+            <input
+              name="nom_sucursal"
+              id="nom_sucursal"
+              class="form-control"
+              type="text"
+              placeholder="Nombre de la Sucursal"
+              required
+              data-tipo="codigo"
+            />
+            <label for="nom_sucursal">Nombre de la sucursal</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input
+              name="direccion"
+              id="direccion"
+              class="form-control"
+              type="text"
+              placeholder="Direccion"
+              required
+              data-tipo="direccion"
+            />
+            <label for="direccion">Dirección</label>
+            <div class="form-floating mt-3">
+              <input
+                name="telefono"
+                id="telefono"
+                class="form-control"
+                type="text"
+                placeholder="Teléfono"
+                data-tipo="telefono"
+              />
+              <label for="telefono">Teléfono del sitio</label>
+            </div>
+          </div>
+        </div>
+        <div class="me-4 d-flex flex-column w-50">
+          <div class="form-floating mb-3">
+            <input
+              name="ciudad"
+              id="ciudad"
+              class="form-control"
+              type="text"
+              placeholder="Ciudad"
+              required
+              data-tipo="ciudad"
+            />
+            <label for="ciudad">Ciudad de la bodega</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input
+              name="descripcion"
+              id="descripcion"
+              class="form-control"
+              type="text"
+              placeholder="Descripción"
+              data-tipo="descripcion"
+            />
+            <label for="descripcion">Detalles adicionales</label>
+          </div>
+          <button id="btnGuardar" type="submit" class="btn btn-secondary mt-3 w-50">
+            Agregar Bodega
+          </button>
+          <button id="btnEditar" type="submit" class="btn btn-secondary mt-3 w-50" style="display: none;">
+            Editar Bodega
+          </button>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmación de Edición</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                ¿Estás seguro de que quieres editar esta bodega?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarEdicion()">Editar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <table
+    id="tablaBodegas"
+    class="table table-striped"
+    style="width: 100%"
+  ></table>
+
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que deseas eliminar esta bodega?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" id="confirmarEliminar" class="btn btn-danger">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%} {%block script%}
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.jqueryui.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+<!-- <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> -->
+
+<script>
+  const currentUrl = window.location.href;
+  const urlBase = currentUrl.split("/")[2];
+  const protocolo = currentUrl.split(":")[0];
+  const url = protocolo + "://" + urlBase;
+  let botonActivo = "";
+  let idSucuEdit = 0;
+
+  async function guardarBodega() {
+    const currentUrl = window.location.href;
+    const form = document.getElementById("bodegaform");
+    const elements = form.elements;
+    const data = {
+      nom_sucursal: elements.nom_sucursal.value,
+      direccion: elements.direccion.value,
+      telefono: elements.telefono.value,
+      ciudad: elements.ciudad.value,
+      descripcion: elements.descripcion.value,
+    };
+    const headers = new Headers({
+      Authorization: `Token ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+    });
+    let response = await fetch(`${url}/api/guardarBodega/`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: headers,
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        } else {
+          throw "Error en la llamada";
+        }
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    response = JSON.parse(response);
+    if (response.success) {
+      alert(response.message);
+      location.href = "/bodegas/";
+    } else {
+      alert(response.message);
+    }
+  }
+
+const botonEditar = document.getElementById("btnEditar");
+const botonGuardar = document.getElementById("btnGuardar");
+
+botonEditar.addEventListener("click", function() {
+  botonActivo = "editar";
+});
+
+botonGuardar.addEventListener("click", function() {
+  botonActivo = "guardar";
+});
+
+console.log(botonActivo);
+
+  const form = document.getElementById("bodegaform");
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (botonActivo === "guardar") {
+      guardarBodega();
+  } else if(botonActivo === "editar"){
+    editarBodega(idSucuEdit);
+  }
+  });
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    const headers = new Headers({
+      Authorization: `Token ${localStorage.getItem("token")}`,
+    });
+    let bodegas = await fetch(`${url}/api/bodegas/`, {
+      method: "GET",
+      headers: headers,
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        } else {
+          throw "Error en la llamada";
+        }
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    bodegas = JSON.parse(bodegas);
+    let tabla = `
+        <thead>
+            <tr>
+                <th>Nombre Sucursal</th>
+                <th>Dirección</th>
+                <th>Teléfono de contacto</th>
+                <th>Ciudad</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    if (bodegas.success) {
+      bodegas.data.forEach((element) => {
+        tabla += `
+            <tr>
+                <td>${element.nom_sucursal}</td>
+                <td>${element.direccion}</td>
+                <td>${element.telefono}</td>
+                <td>${element.ciudad}</td>
+                <td>${element.descripcion}</td>
+                <td>
+                    <a class="mb-2" onClick="editar('${element.id_sucursal}')">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit align-middle me-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
+									</a>
+                  <a class="mb-2" onClick="eliminar('${element.id_sucursal}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2 align-middle me-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+									</a>
+                </td>
+            </tr>`;
+      });
+    }
+    const tablaBodegas = document.getElementById("tablaBodegas");
+    tablaBodegas.innerHTML = tabla;
+
+    new DataTable("#tablaBodegas");
+
+  });
+
+
+
+async function editar(id_sucursal) {
+  const headers = new Headers({
+    Authorization: `Token ${localStorage.getItem("token")}`,
+  });
+
+  try {
+    const response = await fetch(`${url}/api/bodegas/${id_sucursal}`, {
+      method: "GET",
+      headers: headers
+    });
+
+    if (!response.ok) {
+      throw "Error en la llamada";
+    }
+
+    const bodega = await response.json();
+
+    const elements = document.getElementById("bodegaform").elements;
+  
+    if (bodega.success) {
+      elements.nom_sucursal.value = bodega.data.nom_sucursal;
+      elements.direccion.value = bodega.data.direccion;
+      elements.telefono.value = bodega.data.telefono;
+      elements.ciudad.value = bodega.data.ciudad;
+      elements.descripcion.value = bodega.data.descripcion;
+
+      document.getElementById("btnGuardar").style.display = "none";
+      document.getElementById("btnEditar").style.display = "inline-block";
+      idSucuEdit = bodega.data.id_sucursal;
+      console.log(idSucuEdit);
+    }
+  } catch (error) {
+    var respuesta = '{"success":false,"error":true,"msg":"' + error + '"}';
+    console.error(error);
+  }
+}
+
+async function editarBodega(id_sucursal) {
+  const form = document.getElementById("bodegaform");
+  const elements = form.elements;
+  const data = {
+    nom_sucursal: elements.nom_sucursal.value,
+    direccion: elements.direccion.value,
+    telefono: elements.telefono.value,
+    ciudad: elements.ciudad.value,
+    descripcion: elements.descripcion.value,
+  };
+
+  // Aquí se abre el modal de confirmación
+  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  confirmModal.show();
+
+  // Función para confirmar la edición
+  window.confirmarEdicion = async function() {
+    const headers = new Headers({
+      'Authorization': `Token ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    });
+    let response = await fetch(`${url}/api/editarBodega/${id_sucursal}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: headers
+    });
+
+    if (response.ok) {
+      response = await response.json();
+      if (response.success) {
+        alert(response.message);
+        location.href = '/bodegas/';
+      } else {
+        alert(response.message);
+      }
+    } else {
+      throw "Error en la llamada";
+    }
+  };
+}
+
+async function eliminarBodega(id_sucursal) {
+  // Mostrar modal de confirmación
+  $('#confirmDeleteModal').modal('show');
+
+  // Configurar evento para el botón de confirmar en el modal
+  $('#confirmarEliminar').on('click', async function () {
+    const headers = new Headers({
+      Authorization: `Token ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+    });
+    let response = await fetch(`${url}/api/eliminarBodega/${id_sucursal}`, {
+      method: "DELETE",
+      headers: headers,
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text();
+        } else {
+          throw "Error en la llamada";
+        }
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta =
+          '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+    response = JSON.parse(response);
+    if (response.success) {
+      alert(response.message);
+      window.location.href = "/bodegas/";
+    } else {
+      alert(response.message);
+    }
+  });
+}
+
+function eliminar(id_sucursal) {
+    eliminarBodega(id_sucursal);
+  }
+</script>
+{%endblock%}

@@ -27,6 +27,9 @@ def editar(request,id):
 def cuerpoReporte(request):
     return render(request, 'static/cuerporeporte.html')
 
+def bodega(request):
+    return render(request, 'static/bodegas.html')
+
 def reporteTalla(request):
     return render(request, 'static/reportetalla.html')
 

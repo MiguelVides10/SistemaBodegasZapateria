@@ -204,6 +204,19 @@ class ProveedoresCreateView(generics.CreateAPIView):
         else:
             return Response({"success": False, "message": "No se pudo crear el proveedor", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+class BodegasCreateView(generics.CreateAPIView):
+    queryset = Bodegas.objects.all()
+    serializer_class = BodegasSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response({"success": True, "message": "Bodega agregado correctamente"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"success": False, "message": "No se pudo guardar la bodega", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CategoriasCreateView(generics.CreateAPIView):
     queryset = Categorias.objects.all()
     serializer_class = CategoriasSerializer
@@ -216,6 +229,19 @@ class CategoriasCreateView(generics.CreateAPIView):
         else:
             return Response({"success": False, "message": "No se pudo crear la Categoria", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class BodegaId(APIView):
+    def get(self, request, id, *args, **kwargs):
+        bodegas = list(Bodegas.objects.filter(id_sucursal=id).values())
+        if(len(bodegas)>0):
+            bodega= bodegas[0]
+        serializer = BodegasSerializer(bodega, many=False)
+
+        response_data = {
+            "success": True,
+            "data": serializer.data
+        }
+        return Response(response_data)
 
 class ProductoId(APIView):
     def get(self, request, id, *args, **kwargs):
@@ -241,8 +267,20 @@ class ProductoDelete (generics.DestroyAPIView):
            instance.delete()
            return Response({"success": True, "message": "Producto Eliminado correctamente"})
        else :
-           return Response({"success": False, "message": "No se pudo actualizar el producto", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
+           return Response({"success": False, "message": "No se pudo eliminar el producto", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
 
+class BodegaDelete (generics.DestroyAPIView):
+    queryset= Bodegas.objects.all()
+    serializer_class = BodegasSerializer
+    lookup_field = 'id_sucursal'
+    def delete(self, request, *args, **kargs):
+       instance = self.get_object()
+       serializer = self.get_serializer(instance, data = request.data, partial= True)
+       if serializer.is_valid():
+           instance.delete()
+           return Response({"success": True, "message": "Bodega Eliminada correctamente"})
+       else :
+           return Response({"success": False, "message": "No se pudo eliminar la bodega", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
 
 class ProductoUpdateApiView(generics.UpdateAPIView):
     queryset = Productos.objects.all()
@@ -258,7 +296,19 @@ class ProductoUpdateApiView(generics.UpdateAPIView):
         else:
             return Response({"success": False, "message": "No se pudo actualizar el producto", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
 
+class BodegaUpdateApiView(generics.UpdateAPIView):
+    queryset = Bodegas.objects.all()
+    serializer_class = BodegasSerializer
+    lookup_field = 'id_sucursal'
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True, "message": "Producto actualizado correctamente"})
+        else:
+            return Response({"success": False, "message": "No se pudo actualizar el producto", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
 
 class InventarioConDatosListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
@@ -291,7 +341,6 @@ class InventarioReporteListView (generics.ListAPIView):
         return Response(response_data)
     
 class InventarioReporteTallaListView(generics.ListAPIView):
-    
     def get(self, request, *args, **kwargs):
         cod_prod= request.query_params.get('cod_prod',"")
         with connection.cursor() as cursor:

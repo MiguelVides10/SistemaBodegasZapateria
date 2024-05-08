@@ -38,37 +38,7 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalProveedores">
-            Proveedores
-        </button>
-        <div class="modal fade" id="modalProveedores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Proveedores</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table id="proveedoresTabla">
-
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <form id="proovedorForm" class="d-flex">
-                            <div class="form-floating me-3">
-                                <input name="nombre_proveedor" id="nombre_proveedor" class="form-control" type="text"
-                                    placeholder="Stock minimo" required />
-                                <label for="nombre_proveedor">Nombre del proveedor</label>
-                            </div>
-                            <button class="btn btn-secondary" type="submit">Agregar
-                                Proveedor</button>
-                        </form>
-                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCategorias">
             Categorías
@@ -100,6 +70,40 @@
                 </div>
             </div>
         </div>
+
+        <button type="button" class="btn btn-secondary mx-3" data-bs-toggle="modal" data-bs-target="#modalProveedores">
+            Proveedores
+        </button>
+        <div class="modal fade" id="modalProveedores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Proveedores</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="proveedoresTabla">
+
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="proovedorForm" class="d-flex">
+                            <div class="form-floating me-3">
+                                <input name="nombre_proveedor" id="nombre_proveedor" class="form-control" type="text"
+                                    placeholder="Stock minimo" required />
+                                <label for="nombre_proveedor">Nombre del proveedor</label>
+                            </div>
+                            <button class="btn btn-secondary" type="submit">Agregar
+                                Proveedor</button>
+                        </form>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a class="btn btn-secondary me-3" href="/bodegas/">Bodegas</a>
 
     </div>
     <table id="tablaProductos" class="table table-striped" style="width:100%">
