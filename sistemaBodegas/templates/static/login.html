@@ -20,23 +20,31 @@
 
     <link href="{% static '/css/app.css'%}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url("{% static '/img/photos/Login.png'%}"); /* Reemplaza 'ruta_de_tu_imagen.jpg' con la ruta de tu imagen */
+            background-repeat: repeat; /* Esto hará que la imagen se repita horizontal y verticalmente */
+            background-size: 500px 500px; /* Esto asegura que la imagen cubra todo el fondo */
+        }
+    </style>
 </head>
 
-<body>
+<body >
     <main class="d-flex w-100">
         <div class="container d-flex flex-column">
             <div class="row vh-100">
                 <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 mx-auto d-table h-100">
                     <div class="d-table-cell align-middle">
 
-                        <div class="text-center mt-4">
-                            <h1 class="h2">¡Bienvenidos!</h1>
-                            <p class="lead">
-                                Ingresa tus credenciales para continuar
-                            </p>
-                        </div>
+                        
 
                         <div class="card">
+                            <div class="text-center mt-4 .bg-light">
+                                <h1 class="h2 .bg-light">¡Bienvenidos!</h1>
+                                <p class="lead .bg-light">
+                                    Ingresa tus credenciales para continuar
+                                </p>
+                            </div>
                             <div class="card-body">
                                 <div class="m-sm-3">
                                     <form>

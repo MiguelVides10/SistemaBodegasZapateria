@@ -3,8 +3,9 @@
 
 {%block template%}
 <div class="container">
+  <a class="btn btn-secondary my-3" href="/productos/"
+  >&#10232; Volver a Productos</a>
   <h1 class="h1 mb-3 text-center">Editar Producto</h1>
-
   <form action="" id="productosForm">
     <div class="d-flex ">
       <div class="me-4 d-flex flex-column w-50 ">
@@ -41,7 +42,7 @@
         <div class="form-floating mb-3">
           <input name="precio" id="precio" class="form-control" type="number" placeholder="Precio unitario:"
             data-tipo="precio" />
-          <label for="precio">Precio</label>
+          <label for="precio">Precio recomendado de venta</label>
         </div>
       </div>
     </div>
@@ -49,6 +50,23 @@
       <button type="submit" class="btn btn-secondary mt-4 w-50">Editar producto</button>
     </div>
   </form>
+  <div class="modal fade" id="confirmarEdicionModal" tabindex="-1" aria-labelledby="confirmarEdicionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarEdicionModalLabel">Confirmar Edición</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Estás seguro de que quieres editar este producto?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="confirmarEdicionBtn">Editar Producto</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {%endblock%}
 
@@ -158,16 +176,25 @@
   });
 
   async function editarProducto() {
-    const form = document.getElementById('productosForm');
-    const element = form.elements;
-    const data = {
-      "cod_prod": element.cod_prod.value,
-      "descripcion": element.descripcion.value,
-      "id_marca": element.id_marca.value,
-      "color": element.color.value,
-      "id_categoria": element.id_categoria.value,
-      "precio": element.precio.value,
-    }
+  const form = document.getElementById('productosForm');
+  const element = form.elements;
+  const data = {
+    "cod_prod": element.cod_prod.value,
+    "descripcion": element.descripcion.value,
+    "id_marca": element.id_marca.value,
+    "color": element.color.value,
+    "id_categoria": element.id_categoria.value,
+    "precio": element.precio.value,
+  };
+
+  // Guardar el modal en una variable
+  const confirmarEdicionModal = new bootstrap.Modal(document.getElementById('confirmarEdicionModal'));
+
+  // Llamada al modal para confirmar la edición
+  confirmarEdicionModal.show();
+
+  // Configuración del evento click para el botón de confirmar edición
+  document.getElementById('confirmarEdicionBtn').addEventListener('click', async function() {
     const headers = new Headers({
       'Authorization': `Token ${localStorage.getItem('token')}`,
       'Content-Type': 'application/json'
@@ -177,31 +204,30 @@
       body: JSON.stringify(data),
       headers: headers
     })
-      .then(function (response) {
-        if (response.ok) {
-          return response.text()
-        } else {
-          throw "Error en la llamada";
-        }
+    .then(function (response) {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw "Error en la llamada";
+      }
+    })
+    .then(function (texto) {
+      return texto;
+    })
+    .catch(function (err) {
+      var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+      return respuesta;
+    });
 
-      })
-      .then(function (texto) {
-        return texto;
-      })
-      .catch(function (err) {
-        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
-        return respuesta;
-      });
     response = JSON.parse(response);
     if (response.success) {
       alert(response.message);
       location.href = '/productos/';
-
     } else {
       alert(response.message);
     }
-
-  }
+  });
+}
   const form = document.getElementById("productosForm");
   form.addEventListener('submit', function (event) {
     event.preventDefault();

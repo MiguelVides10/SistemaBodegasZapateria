@@ -108,7 +108,23 @@
     </div>
     <table id="tablaProductos" class="table table-striped" style="width:100%">
     </table>
-
+    <div class="modal fade" id="confirmarEliminacionModal" tabindex="-1" aria-labelledby="confirmarEliminacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmarEliminacionModalLabel">Confirmar Eliminación</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ¿Estás seguro de que quieres eliminar este producto?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-danger" id="confirmarEliminacionBtn">Eliminar Producto</button>
+            </div>
+          </div>
+        </div>
+      </div>
 </div>
 {%endblock%}
 
@@ -450,35 +466,44 @@
     }
 
     async function eliminarProducto(cod_prod) {
-        const headers = new Headers({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        });
-        let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`, {
-            method: 'DELETE',
-            headers: headers
-        }).then(function (response) {
-            if (response.ok) {
-                return response.text()
-            } else {
-                throw "Error en la llamada";
-            }
-        })
-            .then(function (texto) {
-                return texto;
-            })
-            .catch(function (err) {
-                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
-                return respuesta;
-            });
-        response = JSON.parse(response);
-        if (response.success) {
-            alert(response.message);
-            window.location.href = "/productos/";
+    // Modal de confirmación de eliminación
+    const confirmarEliminacionModal = new bootstrap.Modal(document.getElementById('confirmarEliminacionModal'));
+    
+    // Configurar evento click para el botón de confirmación de eliminación
+    document.getElementById('confirmarEliminacionBtn').addEventListener('click', async function() {
+      const headers = new Headers({
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      });
+      let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`, {
+        method: 'DELETE',
+        headers: headers
+      }).then(function(response) {
+        if (response.ok) {
+          return response.text()
         } else {
-            alert(response.message);
+          throw "Error en la llamada";
         }
-    }
+      })
+      .then(function(texto) {
+        return texto;
+      })
+      .catch(function(err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+      response = JSON.parse(response);
+      if (response.success) {
+        alert(response.message);
+        window.location.href = "/productos/";
+      } else {
+        alert(response.message);
+      }
+    });
+    
+    // Mostrar modal de confirmación de eliminación
+    confirmarEliminacionModal.show();
+  }
     function eliminar(cod_prod) {
         eliminarProducto(cod_prod);
     }
