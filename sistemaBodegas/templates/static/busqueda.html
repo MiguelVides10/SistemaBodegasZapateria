@@ -19,8 +19,8 @@
 								<label for="">Cantidad a Vender:</label>
 							</div>
 							<div class="col-7">
-								<input name="cantidad" id="cantidad" class="form-control" type="number"
-									placeholder="canitdad" required />
+								<input name="cantidad" id="cantidad" class="form-control" type="number" min="0"
+									placeholder="Cantidad" required />
 							</div>
 						</div>
 					</form>
@@ -97,7 +97,7 @@
 			  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-			  La cantidad de productos en inventario es menor a 5.
+			  La cantidad de productos en inventario es menor o igual a 5.
 			</div>
 			<div class="modal-footer">
 			  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
