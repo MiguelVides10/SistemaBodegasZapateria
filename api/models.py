@@ -209,6 +209,7 @@ class ProductosBodegas(models.Model):
     tipo = models.CharField(max_length=8, blank=True, null=True)
     costo = models.FloatField(blank=True, null=True)
     cantidad = models.FloatField(blank=True, null=True)
+    precio = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
