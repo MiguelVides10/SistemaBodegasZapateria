@@ -317,7 +317,7 @@ class InventarioConDatosListView(generics.ListAPIView):
         bodega = request.query_params.get('id_sucursal', 0)
 
         with connection.cursor() as cursor:
-            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN total ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN total ELSE 0 END) AS total, p.descripcion as nombre, p.color, b.nom_sucursal as bodega,b.id_sucursal,p.cod_prod, pb.talla, p.precio, m.nombre_marca as marca, p.foto FROM productos p INNER JOIN marcas m ON p.id_marca = m.id_marca INNER JOIN productos_bodegas pb ON p.cod_prod = pb.cod_prod INNER JOIN bodegas b ON pb.id_sucursal = b.id_sucursal WHERE p.cod_prod = %s AND pb.talla = %s AND b.id_sucursal = %s GROUP BY p.descripcion,p.precio ,p.cod_prod,p.color, b.id_sucursal, pb.talla,m.nombre_marca,p.foto",
+            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN cantidad ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN cantidad ELSE 0 END) AS total, p.descripcion as nombre, p.color, b.nom_sucursal as bodega,b.id_sucursal,p.cod_prod, pb.talla, p.precio, m.nombre_marca as marca, p.foto FROM productos p INNER JOIN marcas m ON p.id_marca = m.id_marca INNER JOIN productos_bodegas pb ON p.cod_prod = pb.cod_prod INNER JOIN bodegas b ON pb.id_sucursal = b.id_sucursal WHERE p.cod_prod = %s AND pb.talla = %s AND b.id_sucursal = %s GROUP BY p.descripcion,p.precio ,p.cod_prod,p.color, b.id_sucursal, pb.talla,m.nombre_marca,p.foto",
                     [cod_prod, talla, bodega])
             rows = dictfetchall(cursor)
 
@@ -331,7 +331,7 @@ class InventarioReporteListView (generics.ListAPIView):
     def get(self, request, *args, **kwargs):
 
         with connection.cursor() as cursor:
-            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN total ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN total ELSE 0 END) AS total,p.descripcion as nombre,m.nombre_marca as marca, p.color, pb.talla, p.precio, b.nom_sucursal as bodega, b.direccion as direccion FROM productos p INNER JOIN marcas m using(id_marca)  INNER JOIN productos_bodegas pb using(cod_prod) INNER JOIN bodegas b using(id_sucursal) GROUP BY p.cod_prod, b.id_sucursal, pb.talla,p.descripcion,m.nombre_marca,p.color,p.precio")
+            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN cantidad ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN cantidad ELSE 0 END) AS total,p.descripcion as nombre,m.nombre_marca as marca, p.color, pb.talla, p.precio, b.nom_sucursal as bodega, b.direccion as direccion FROM productos p INNER JOIN marcas m using(id_marca)  INNER JOIN productos_bodegas pb using(cod_prod) INNER JOIN bodegas b using(id_sucursal) GROUP BY p.cod_prod, b.id_sucursal, pb.talla,p.descripcion,m.nombre_marca,p.color,p.precio")
             rows = dictfetchall(cursor)
 
         response_data = {
@@ -344,7 +344,7 @@ class InventarioReporteTallaListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         cod_prod= request.query_params.get('cod_prod',"")
         with connection.cursor() as cursor:
-            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN total ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN total ELSE 0 END) AS total,p.descripcion as nombre,m.nombre_marca as marca, p.color, pb.talla, p.precio, b.nom_sucursal as bodega, b.direccion as direccion FROM productos p INNER JOIN marcas m using(id_marca)  INNER JOIN productos_bodegas pb using(cod_prod) INNER JOIN bodegas b using(id_sucursal) WHERE p.cod_prod =%s GROUP BY p.cod_prod, b.id_sucursal, pb.talla,p.descripcion,m.nombre_marca,p.color,p.precio",[cod_prod])
+            cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN cantidad ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN cantidad ELSE 0 END) AS total,p.descripcion as nombre,m.nombre_marca as marca, p.color, pb.talla, p.precio, b.nom_sucursal as bodega, b.direccion as direccion FROM productos p INNER JOIN marcas m using(id_marca)  INNER JOIN productos_bodegas pb using(cod_prod) INNER JOIN bodegas b using(id_sucursal) WHERE p.cod_prod =%s GROUP BY p.cod_prod, b.id_sucursal, pb.talla,p.descripcion,m.nombre_marca,p.color,p.precio",[cod_prod])
             rows = dictfetchall(cursor)
 
         response_data = {
