@@ -37,7 +37,7 @@ CREATE TABLE `bodegas` (
   `ciudad` varchar(75) DEFAULT NULL,
   `descripcion` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id_sucursal`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.categorias definition
@@ -101,7 +101,7 @@ CREATE TABLE `facturas` (
   `total` double DEFAULT NULL,
   `totalDesc` double DEFAULT NULL,
   PRIMARY KEY (`idfactura`)
-) ENGINE=InnoDB AUTO_INCREMENT=9248 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.marcas definition
@@ -110,7 +110,7 @@ CREATE TABLE `marcas` (
   `id_marca` int NOT NULL AUTO_INCREMENT,
   `nombre_marca` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id_marca`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- sistema_bodegas.productos definition
@@ -126,7 +126,7 @@ CREATE TABLE `productos` (
   `id_producto` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id_producto`),
   KEY `id_categoria` (`id_categoria`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.productos_bodegas definition
@@ -145,7 +145,7 @@ CREATE TABLE `productos_bodegas` (
   PRIMARY KEY (`id_producto_sucursal`),
   KEY `id_sucursal` (`id_sucursal`),
   KEY `cod_prod` (`cod_prod`)
-) ENGINE=InnoDB AUTO_INCREMENT=3970 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.proveedores definition
@@ -154,7 +154,7 @@ CREATE TABLE `proveedores` (
   `cod_proveedor` int NOT NULL AUTO_INCREMENT,
   `nom_proveedor` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`cod_proveedor`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.auth_permission definition

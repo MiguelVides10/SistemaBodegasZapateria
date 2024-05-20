@@ -240,8 +240,10 @@
 			stock = inventario.total;
 
 			const modalAlert = new bootstrap.Modal(document.getElementById('modalAlert'));
+			const modalBody = document.querySelector('#modalAlert .modal-body');
 
 				if (stock <= 5) {
+					modalBody.textContent = `Hay pocos productos en Stock ${stock}`;
 					modalAlert.show();
 				}
 
@@ -286,7 +288,7 @@
 		}
 		const venta = {
 			...productoVenta,
-			total: cantidad,
+			cantidad: cantidad,
 			precio:precio
 		}
 
