@@ -26,6 +26,7 @@ urlpatterns = [
     path('editarProducto/<str:cod_prod>', ProductoUpdateApiView.as_view(), name='producto-edit'),
     path('cuerpoReporte/',InventarioReporteListView.as_view(), name='reporte-productos'),
     path('cuerporeporteTalla/', InventarioReporteTallaListView.as_view(), name='repote-talla'),
+    path('cuerporeporteCompras/', InventarioReporteComprasListView.as_view(), name='repote-talla'),
     path('eliminarProd/<str:cod_prod>',ProductoDelete.as_view(), name='delete-prod'),
     path('buscar/', InventarioConDatosListView.as_view(), name="datos"),
 ]

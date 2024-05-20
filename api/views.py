@@ -157,10 +157,14 @@ class InventarioCreateView(generics.CreateAPIView):
             descuento = request.POST.getlist('descuento')
             total = request.POST.getlist('total')
             totalDesc = request.POST.getlist('totalDesc')
-            consulta = 'INSERT into facturas set num_fact = %s,descuento = %s, cod_proveedor = %s, total=%s, totalDesc = %s'
-            parametros = (num_fact,descuento,id_proveedor,total,totalDesc)
+            consulta = "INSERT into facturas set num_fact = %s, descuento = %s, cod_proveedor = %s, total = %s, totalDesc = %s, fecha_fact = STR_TO_DATE(%s, '%%d/%%m/%%Y'), fecha_creacion = now()"
+
+            id_insertado = 0
+            parametros = (num_fact,descuento,id_proveedor,total,totalDesc,fecha)
             with connection.cursor() as cursor:
                 cursor.execute(consulta, parametros)
+                id_insertado = cursor.lastrowid
+
 
             bodegas = request.POST.getlist('bodegas[]')
             productos = request.POST.getlist('productos[]')
@@ -169,8 +173,8 @@ class InventarioCreateView(generics.CreateAPIView):
             costos = request.POST.getlist('costos[]')
             totales = request.POST.getlist('totales[]')
             for index, item in enumerate(productos):
-                consulta = "INSERT INTO sistema_bodegas.productos_bodegas (id_sucursal, cod_prod, talla, cantidad,costo,total,tipo) VALUES(%s, %s, %s, %s, %s, %s, 'carga')"
-                parametros = (bodegas[index],item,tallas[index],cantidades[index],costos[index],totales[index])
+                consulta = "INSERT INTO sistema_bodegas.productos_bodegas (id_sucursal, cod_prod, talla, cantidad,costo,total,tipo,id_factura) VALUES(%s, %s, %s, %s, %s, %s, 'carga',%s)"
+                parametros = (bodegas[index],item,tallas[index],cantidades[index],costos[index],totales[index],id_insertado)
                 with connection.cursor() as cursor:
                     cursor.execute(consulta, parametros)
             return Response({"success": True, "message": "Registros insertados"}, status=status.HTTP_201_CREATED)
@@ -346,6 +350,26 @@ class InventarioReporteTallaListView(generics.ListAPIView):
         with connection.cursor() as cursor:
             cursor.execute("SELECT SUM(CASE WHEN tipo = 'carga' THEN cantidad ELSE 0 END) - SUM(CASE WHEN tipo = 'descarga' THEN cantidad ELSE 0 END) AS total,p.descripcion as nombre,m.nombre_marca as marca, p.color, pb.talla, p.precio, b.nom_sucursal as bodega, b.direccion as direccion FROM productos p INNER JOIN marcas m using(id_marca)  INNER JOIN productos_bodegas pb using(cod_prod) INNER JOIN bodegas b using(id_sucursal) WHERE p.cod_prod =%s GROUP BY p.cod_prod, b.id_sucursal, pb.talla,p.descripcion,m.nombre_marca,p.color,p.precio",[cod_prod])
             rows = dictfetchall(cursor)
+
+        response_data = {
+            "success": True,
+            "data": rows,
+        }
+        return Response(response_data)
+
+class InventarioReporteComprasListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        fecha= request.query_params.get('fecha',"")
+        with connection.cursor() as cursor:
+            print(fecha)
+            cursor.execute("select DATE_FORMAT(fecha_fact , '%%d/%%m/%%Y') as fecha,p.nom_proveedor,f.* from facturas f inner join proveedores p using(cod_proveedor) where fecha_fact = STR_TO_DATE(%s, '%%d/%%m/%%Y')",[fecha])
+
+            rows = dictfetchall(cursor)
+
+            for row in rows:
+                cursor.execute("select * from productos_bodegas pb where pb.id_factura = %s", [row["idfactura"]])
+                productos = dictfetchall(cursor)
+                row["productos"] = productos
 
         response_data = {
             "success": True,

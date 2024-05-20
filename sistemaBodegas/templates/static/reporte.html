@@ -1,6 +1,10 @@
 {% extends "../base.html"%}
 {% load static %}
 {%block template%}
+<link
+  href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css"
+  rel="stylesheet"
+/>
 <div class="container-fluid p-0">
   
   <div class="row ">
@@ -34,12 +38,44 @@
       </button>
     </div>
   </div>
+  <div class="row mt-4">
+    <div class="col-2">
+      <label for="">Reporte de compras</label>
+    </div>
+    <div class="col-3">
+      <input class="form-select" id="datepicker" name="datepicker" type="text" placeholder="Seleccione una fecha"/>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteCompras()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteCompras()">Descargar reporte</button>
+    </div>
+  </div>
 </div>
 
 {%endblock%}
 
 {%block script%}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 <script>
+  $(document).ready(function() {
+    const date = new Date()
+    console.log(date);
+    $("#datepicker").datepicker({
+        dateFormat: "dd/mm/yy",
+        defaultDate: new Date() 
+    });
+    var dia = date.getDate().toString().padStart(2, '0'); 
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0'); 
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#datepicker").val(fechaFormateada)
+  });
+
   const currentUrl = window.location.href;
   const urlBase = currentUrl.split("/")[2];
   const protocolo = currentUrl.split(":")[0];
@@ -103,6 +139,23 @@
       return;
     }
     window.location.href = `${url}/reporteportalla/?cod_prod=${cod_prod}&descargar=1`
+  }
+  
+  function generarReporteCompras() {
+    const fecha = document.getElementById("datepicker").value;
+    if (fecha == "") {
+      alert("Seleccione una fecha")
+    }
+    
+    window.open(`${url}/reporteporcompras/?fecha=${fecha}`, '_blank');
+  }
+  
+  function descargarReporteCompras() {
+    const fecha = document.getElementById("datepicker").value;
+    if (fecha == "") {
+      alert("Seleccione una fecha")
+    }
+    window.location.href = `${url}/reporteporcompras/?fecha=${fecha}&descargar=1`
   }
   
 </script>

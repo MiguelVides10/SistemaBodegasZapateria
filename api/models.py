@@ -210,6 +210,7 @@ class ProductosBodegas(models.Model):
     costo = models.FloatField(blank=True, null=True)
     cantidad = models.FloatField(blank=True, null=True)
     precio = models.FloatField(blank=True, null=True)
+    id_factura = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -33,5 +33,8 @@ def bodega(request):
 def reporteTalla(request):
     return render(request, 'static/reportetalla.html')
 
+def reporteCompras(request):
+    return render(request, 'static/reportecompras.html')
+
 def reporte(request):
     return render(request, 'static/reporte.html',{'navbar':'reporte'})

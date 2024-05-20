@@ -17,6 +17,7 @@ urlpatterns = [
     path('buscar/<int:id>/<str:cod_prod>/<slug:talla>', views.buscarInvent, name="busqueda"),
     path('cuerpo/',views.cuerpoReporte, name='datos-reporte'),
     path('reporteportalla/', views.reporteTalla, name='reporte-talla'),
+    path('reporteporcompras/', views.reporteCompras, name='reporte-talla'),
     path('bodegas/',views.bodega, name= 'bodegas'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('api/', include(api_urls)),
