@@ -57,7 +57,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- sistema_bodegas.django_migrations definition
@@ -68,7 +68,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- sistema_bodegas.django_session definition
@@ -101,7 +101,7 @@ CREATE TABLE `facturas` (
   `total` double DEFAULT NULL,
   `totalDesc` double DEFAULT NULL,
   PRIMARY KEY (`idfactura`)
-) ENGINE=InnoDB AUTO_INCREMENT=9242 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=9248 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.marcas definition
@@ -126,7 +126,7 @@ CREATE TABLE `productos` (
   `id_producto` int NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id_producto`),
   KEY `id_categoria` (`id_categoria`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.productos_bodegas definition
@@ -140,10 +140,12 @@ CREATE TABLE `productos_bodegas` (
   `tipo` enum('carga','descarga') DEFAULT NULL,
   `costo` double DEFAULT '0',
   `cantidad` double DEFAULT '0',
+  `precio` double DEFAULT NULL,
+  `id_factura` int DEFAULT NULL,
   PRIMARY KEY (`id_producto_sucursal`),
   KEY `id_sucursal` (`id_sucursal`),
   KEY `cod_prod` (`cod_prod`)
-) ENGINE=InnoDB AUTO_INCREMENT=3959 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=3970 DEFAULT CHARSET=utf8mb3;
 
 
 -- sistema_bodegas.proveedores definition
@@ -165,7 +167,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- sistema_bodegas.auth_user_groups definition
