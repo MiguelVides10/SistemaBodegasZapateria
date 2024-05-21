@@ -31,14 +31,12 @@
 <body>
 <main class="container" id="contenido">
     <div id="cabecera">
+        
     </div>
     <hr>
-    <br>
-            <br>
-            <br>
-            <br>
-    <div id="cuerpo"></div>
-    
+    <table id="resultado" class="table table-bordered mt-4" style="width:100%">
+
+    </table>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -46,19 +44,17 @@
     const currentUrl = window.location.href;
 	const urlBase = currentUrl.split("/")[2];
 	const protocolo = currentUrl.split(":")[0];
-    const cod_prod = currentUrl.split("/")[4];
 	const url = protocolo + "://" + urlBase;
     const urlActual = window.location.href;
     const urlParams = new URL(urlActual);
     const Descargar = urlParams.searchParams.get('descargar');
     document.addEventListener('DOMContentLoaded', async function(){
-        const urlActual = window.location.href;
         const urlparams = new URL(urlActual);
-        const fecha = urlparams.searchParams.get('fecha');
+        const fecha1 = urlparams.searchParams.get('fecha');
         const headers = new Headers({
 			'Authorization': `Token ${localStorage.getItem('token')}`
 		});
-        let informacion = await fetch(`${url}/api/cuerporeporteCompras/?fecha=${fecha}`,{
+        let informacion = await fetch(`${url}/api/cuerpoReporteVentaDia/?fecha=${fecha1}`,{
             method: 'GET',
             headers:headers
         }).then(function (response) {
@@ -77,91 +73,62 @@
 				return respuesta;
 			});
         informacion = JSON.parse(informacion);
-        let contenido ="";
-        
-        if (informacion.success){
-            informacion.data.forEach(item => {
-            contenido += `   
-            <div class="row">
-                <div class="col">
-                    <h3>Factura ${item.num_fact}</h1>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <p class="lead">Descuento aplicado: ${item.descuento}%</p>
-                </div>
-                <div class="col">
-                    <p class="lead">Proveedor: ${item.nom_proveedor}</p>
-                </div>
-            </div>
-            <hr>
-            `;
-                            
-
-            contenido += `
-                    <table id="resultado" class="table table-bordered mt-4" style="width:100%">
-                        <thead>
+        let contenido = `<thead>
                             <tr>
-                                <th>Sucursal</th>
-                                <th>Nombre</th>
-                                <th>Cantidad</th>
-                                <th>Costo</th>
+                                <th>Códido de Producto</th>
+                                <th>Descripción</th>
                                 <th>Talla</th>
+                                <th>Cantidad</th>
+                                <th>Precio</th>
                                 <th>Total</th>
+                                <th>Fecha</th>
                             </tr>
                         </thead>
                         <tbody>`;
-            let totalFactura = 0;
-            item.productos.forEach(element => {
+        let totalVentas=0;
+        if (informacion.success){
+            informacion.data.forEach(element => {
                 contenido += `
                 <tr>
-                    <td>${element.id_sucursal}</td>
                     <td>${element.cod_prod}</td>
-                    <td>${element.cantidad}</td>
-                    <td>${element.costo}</td>
+                    <td>${element.descripcion}</td>
                     <td>${element.talla}</td>
+                    <td>${element.cantidad}</td>
+                    <td>${element.precio}</td>
                     <td>$${element.total}</td>
+                    <td>${element.fecha}</td>
                 <tr>`
-                    totalFactura+=element.total;
+                    totalVentas+=element.total;
             });
-            contenido += `
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan=5></td>   
-                    <td>$${totalFactura}</td>   
-                <tr>    
-            </tfoot>
-            </table>
-            <br>
-            <br>
-            <br>
-            <br>
-
-            `;
-
-        });
+            contenido+= `</tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan=5></td>   
+                                        <td>$${totalVentas}</td>   
+                                    <tr>    
+                                </tfoot>
+                                </table>`
         }
-        const cuerpo = document.getElementById("cuerpo");
-        cuerpo.innerHTML = contenido;
+        const resultado = document.getElementById("resultado");
+        resultado.innerHTML = contenido;
 
         const cabecera = document.getElementById("cabecera");
-        const fechaActual = new Date();
-        var dia = fechaActual.getDate();
-        var mes = fechaActual.getMonth()+1;
-        var anio = fechaActual.getFullYear();
-        var hora = fechaActual.getHours();
-        var minutos = fechaActual.getMinutes();
+        const fecha = new Date();
+        var dia = fecha.getDate();
+        var mes = fecha.getMonth()+1;
+        var anio = fecha.getFullYear();
+        var hora = fecha.getHours();
+        var minutos = fecha.getMinutes();
         var formatFecha = dia + "/"+ mes + "/"+ anio;
         var horaCompleta = hora +":"+minutos;
-        let fechaReporte = `    <h1 class="h1">Reporte de compras en la fecha: ${fecha}</h1>
+        let fechaReporte = `    <h1 class="h1">Reporte Ventas por día</h1>
                                 <h2 class="h2">Variedades Nahomy</h2>
                                 <img class="me-2" src="{%static '/img/photos/LogoD.png'%}" alt="logo calzado Nahomy" id="imagenLogo" width="25%">
+                                <h3 class="h3" >${formatFecha}</h3>
                                 <h3 class="h3" >Hora: ${horaCompleta}</h3>
-                                
                                 `;
         cabecera.innerHTML= fechaReporte;
+
 
         window.jsPDF = window.jspdf.jsPDF;
 
@@ -169,9 +136,12 @@
         var datos = document.getElementById("contenido");
         doc.html(datos, {
                 callback: function(doc) {
+                    const urlActual = window.location.href;
+                    const url = new URL(urlActual);
+                    const Descargar = url.searchParams.get('descargar');
                     // Save the PDF
-                    if(Descargar==1){
-                        doc.save(`reporte${cod_prod}-${dia}-${mes}-${anio}.pdf`);
+                    if (Descargar==1) {
+                        doc.save(`reporte ventas-${dia}-${mes}-${anio}.pdf`);
                     }
                 },
                 x: 15,
@@ -179,13 +149,17 @@
                 width: 190, //target width in the PDF document
                 windowWidth: 800 //window width in CSS pixels
             });
-            if(Descargar==1){
+            const urlActual2 = window.location.href;
+            const url2 = new URL(urlActual2);
+            const Descargar = url2.searchParams.get('descargar');
+            if (Descargar==1) {
                 setTimeout(function(){
-                    window.location.href =`${url}/reporte/`
+                window.location.href =`${url}/reporte/`
                 },1000);
             }
             
     });
+    
 
 </script>
 </body>

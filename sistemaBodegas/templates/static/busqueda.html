@@ -282,15 +282,17 @@
 	const venderProducto = async () => {
 		const cantidad = document.getElementById("cantidad").value;
 		const precio = document.getElementById("precio_vendido").value;
-		if (cantidad > stock) {
-			alert("No hay suficiente stock para realizar esta venta");
-			return;
-		}
-		const venta = {
-			...productoVenta,
-			cantidad: cantidad,
-			precio:precio
-		}
+
+				if (cantidad > stock) {
+					alert("No hay suficiente stock para realizar esta venta");
+					return;
+				}
+				const venta = {
+					...productoVenta,
+					cantidad: cantidad,
+					total: cantidad*precio,
+					precio:precio
+				}
 
 		const request = `${url}/api/venderInventario/`;
 		const headers = new Headers({

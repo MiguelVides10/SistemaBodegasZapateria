@@ -16,12 +16,12 @@
           <label for="cod_prod">Codigo del producto</label>
         </div>
         <div class="form-floating mb-3">
-          <select class="form-select" id="id_categoria" name="id_categoria">
+          <select class="form-select" id="id_categoria" name="id_categoria" required>
           </select>
           <label for="id_categoria">Categorías</label>
         </div>
         <div class="form-floating mb-3">
-          <input name="color" id="color" class="form-control" type="text" placeholder="Stock minimo" />
+          <input name="color" id="color" class="form-control" type="text" placeholder="Stock minimo" required />
           <label for="color">Color</label>
         </div>
         <input type="file" class="form-control" id="foto" name="foto">
@@ -33,13 +33,13 @@
           <label for="descripcion">Descripcion del producto</label>
         </div>
         <div class="form-floating mb-3">
-          <select class="form-select" id="id_marca" name="id_marca">
+          <select class="form-select" id="id_marca" name="id_marca" required>
           </select>
           <label for="id_marca">Marca</label>
         </div>
         <div class="form-floating mb-3">
           <input name="precio" id="precio" class="form-control" type="number" placeholder="Precio unitario:"
-            data-tipo="precio" />
+            data-tipo="precio"  required/>
           <label for="precio">Precio recomendado de venta</label>
         </div>
       </div>

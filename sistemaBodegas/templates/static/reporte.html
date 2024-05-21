@@ -52,6 +52,38 @@
       <button type="submit" class="btn btn-secondary" onclick="descargarReporteCompras()">Descargar reporte</button>
     </div>
   </div>
+  <div class="row mt-4">
+    <div class="col-5">
+      <label for="">Reporte de Ventas por día</label>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="generarReporteVentasd()">
+        Generar Reporte
+      </button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="descargarReporteVentasD()">
+        Descargar Reporte
+      </button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-2">
+      <label for="">Reporte de Ventas por fechas</label>
+    </div>
+    <div class="col-3">
+      <input class="form-select" id="fechaInicio" name="datepicker" type="text" placeholder="Desde: "/>
+    </div>
+    <div class="col-3">
+      <input class="form-select" id="fechaFin" name="datepicker" type="text" placeholder="Hasta: "/>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteVentasF()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteVentasF()">Descargar reporte</button>
+    </div>
+  </div>
 </div>
 
 {%endblock%}
@@ -64,7 +96,6 @@
 <script>
   $(document).ready(function() {
     const date = new Date()
-    console.log(date);
     $("#datepicker").datepicker({
         dateFormat: "dd/mm/yy",
         defaultDate: new Date() 
@@ -74,6 +105,32 @@
     var anio = date.getFullYear();
     var fechaFormateada = `${dia}/${mes}/${anio}`;
     $("#datepicker").val(fechaFormateada)
+  });
+
+  $(document).ready(function() {
+    const date = new Date()
+    $("#fechaInicio").datepicker({
+        dateFormat: "dd/mm/yy",
+        defaultDate: new Date() 
+    });
+    var dia = date.getDate().toString().padStart(2, '0'); 
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0'); 
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#fechaInicio").val(fechaFormateada)
+  });
+
+  $(document).ready(function() {
+    const date = new Date()
+    $("#fechaFin").datepicker({
+        dateFormat: "dd/mm/yy",
+        defaultDate: new Date() 
+    });
+    var dia = date.getDate().toString().padStart(2, '0'); 
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0'); 
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#fechaFin").val(fechaFormateada)
   });
 
   const currentUrl = window.location.href;
@@ -156,6 +213,60 @@
       alert("Seleccione una fecha")
     }
     window.location.href = `${url}/reporteporcompras/?fecha=${fecha}&descargar=1`
+  }
+
+  function generarReporteVentasd() {
+    const fechaActual = new Date();
+    const dia = fechaActual.getDate();
+    const mes = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const anio = fechaActual.getFullYear();
+
+    // Asegurarse de que el día y el mes tengan dos dígitos
+    const diaFormateado = dia.toString().padStart(2, '0');
+    const mesFormateado = mes.toString().padStart(2, '0');
+
+    const fechaFormat= `${diaFormateado}/${mesFormateado}/${anio}`;
+    
+    window.open(`${url}/reporteventasd/?fecha=${fechaFormat}`, '_blank');
+  }
+  
+  function descargarReporteVentasD() {
+    const fechaActual = new Date();
+    const dia = fechaActual.getDate();
+    const mes = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const anio = fechaActual.getFullYear();
+
+    // Asegurarse de que el día y el mes tengan dos dígitos
+    const diaFormateado = dia.toString().padStart(2, '0');
+    const mesFormateado = mes.toString().padStart(2, '0');
+
+    const fechaFormat= `${diaFormateado}/${mesFormateado}/${anio}`;
+    window.location.href = `${url}/reporteventasd/?fecha=${fechaFormat}&descargar=1`
+  }
+
+  function generarReporteVentasF() {
+    const fechai = document.getElementById("fechaInicio").value;
+    if (fechai == "") {
+      alert("Seleccione una fecha de inicio")
+    }
+    const fechad = document.getElementById("fechaFin").value;
+    if (fechad == "") {
+      alert("Seleccione una fecha de Fin")
+    }
+    window.open(`${url}/reporteventasf/?fechai=${fechai}&fechad=${fechad}`, '_blank');
+  }
+  
+  function descargarReporteVentasF() {
+    const fechai = document.getElementById("fechaInicio").value;
+    if (fechai == "") {
+      alert("Seleccione una fecha de inicio")
+    }
+    const fechad = document.getElementById("fechaFin").value;
+    if (fechad == "") {
+      alert("Seleccione una fecha de Fin")
+    }
+    window.open(`${url}/reporteventasf/?fechai=${fechai}&fechad=${fechad}&descargar=1`, '_blank');
+
   }
   
 </script>

@@ -1,7 +1,8 @@
 from rest_framework.response import Response
 from rest_framework import generics, status
+from django.db.models.functions import Now
 from rest_framework.views import APIView
-from django.db import connection
+from django.db import connection, DatabaseError
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -216,7 +217,7 @@ class BodegasCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            return Response({"success": True, "message": "Bodega agregado correctamente"}, status=status.HTTP_201_CREATED)
+            return Response({"success": True, "message": "Bodega agregada correctamente"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"success": False, "message": "No se pudo guardar la bodega", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -377,14 +378,57 @@ class InventarioReporteComprasListView(generics.ListAPIView):
         }
         return Response(response_data)
     
+class VentaReporteListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        fecha= request.query_params.get('fecha',"")
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT  cod_prod, p.descripcion, talla, cantidad, pb.precio, total, DATE_FORMAT(fecha_venta, '%%d/%%m/%%Y') AS fecha FROM productos_bodegas pb INNER JOIN productos p USING(cod_prod) WHERE fecha_venta = STR_TO_DATE(%s, '%%d/%%m/%%Y') and tipo='descarga';",[fecha])
+            rows = dictfetchall(cursor)
+
+        response_data = {
+            "success": True,
+            "data": rows,
+        }
+        return Response(response_data)
+
+class VentaReporteFechasListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        fechai= request.query_params.get('fechai',"")
+        fechad= request.query_params.get('fechad',"")
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT  cod_prod, p.descripcion, talla, cantidad, pb.precio, total, DATE_FORMAT(fecha_venta, '%%d/%%m/%%Y') AS fecha FROM productos_bodegas pb INNER JOIN productos p USING(cod_prod) WHERE fecha_venta BETWEEN STR_TO_DATE(%s, '%%d/%%m/%%Y') AND STR_TO_DATE(%s, '%%d/%%m/%%Y')AND tipo = 'descarga' ORDER BY fecha ASC;",[fechai, fechad])
+            rows = dictfetchall(cursor)
+
+        response_data = {
+            "success": True,
+            "data": rows,
+        }
+        return Response(response_data)
+    
 class VenderProductoView(generics.CreateAPIView):
     queryset = ProductosBodegas.objects.all()
     serializer_class = ProductosBodegasSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
+        # Obtener los datos necesarios del request
+        id_sucursal =request.data.get("id_sucursal")
+        cod_prod = request.data.get('cod_prod')
+        talla = request.data.get('talla')
+        cantidad = request.data.get('cantidad')
+        precio = request.data.get('precio')
+        total = request.data.get('total')
+        tipo = request.data.get('tipo')
+
+        try:
+            # Ejecutar la sentencia SQL de inserción directa con la fecha formateada
+            with connection.cursor() as cursor:
+                cursor.execute('''
+                    INSERT INTO productos_bodegas ( id_sucursal, cod_prod, talla, cantidad, precio, total, fecha_venta, tipo)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s)
+                ''', [id_sucursal, cod_prod, talla, cantidad, precio, total, tipo])
+
             return Response({"success": True, "message": "Venta realizada correctamente"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"success": False, "message": "No se pudo crear la Marca", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except DatabaseError as e:
+            # Manejar el error y devolver una respuesta adecuada
+            return Response({"success": False, "message": "No se pudo realizar la venta", "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

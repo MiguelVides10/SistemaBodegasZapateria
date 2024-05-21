@@ -288,10 +288,7 @@
             }
             const totalActual = cantidad.value * costo.value;
             total = total + totalActual
-            console.log("TOtal:"+total);
-            console.log("desc:"+descuento.value);
             const totalConDecuento = (descuento.value > 0) ? (total - (total * (descuento.value/100))) : total;
-            console.log("desc:"+totalConDecuento);
 
             const html = `
             <tr>
