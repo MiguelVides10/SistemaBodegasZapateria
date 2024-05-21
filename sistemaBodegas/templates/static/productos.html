@@ -5,14 +5,14 @@
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css" rel="stylesheet">
 
 <div class="container">
+    <h1 class="h1 text-center mb-4">Productos</h1>
     <div class="d-flex mb-4">
-        
         <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalMarcas">
             Marcas
         </button>
         <div class="modal fade" id="modalMarcas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Marcas</h5>
@@ -45,7 +45,7 @@
         </button>
         <div class="modal fade" id="modalCategorias" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Categorías</h5>
@@ -76,7 +76,7 @@
         </button>
         <div class="modal fade" id="modalProveedores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Proveedores</h5>
@@ -107,6 +107,7 @@
         <a class="btn btn-secondary me-3" href="/guardar/">Nuevo Producto</a>
 
     </div>
+    
     <table id="tablaProductos" class="table table-striped" style="width:100%">
     </table>
     <div class="modal fade" id="confirmarEliminacionModal" tabindex="-1" aria-labelledby="confirmarEliminacionModalLabel" aria-hidden="true">
