@@ -311,9 +311,9 @@ class BodegaUpdateApiView(generics.UpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"success": True, "message": "Producto actualizado correctamente"})
+            return Response({"success": True, "message": "Bodega actualizada correctamente"})
         else:
-            return Response({"success": False, "message": "No se pudo actualizar el producto", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
+            return Response({"success": False, "message": "No se pudo actualizar la bodega", "details": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
 
 class InventarioConDatosListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
