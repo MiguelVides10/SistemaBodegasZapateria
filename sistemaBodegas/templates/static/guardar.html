@@ -54,11 +54,15 @@
 {%block script%}
 <script>
 
-  async function revisarDatos() {
-    let base64Image = '';  
-    const input = document.getElementById('foto');
-    if (input.files.length > 0) {
-      const file = input.files[0];
+async function revisarDatos() {
+  let base64Image = '';  
+  const input = document.getElementById('foto');
+
+  if (input.files.length > 0) {
+    const file = input.files[0];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (validTypes.includes(file.type)) {
       const reader = new FileReader();
       reader.onload = function(event) {
         base64Image = event.target.result;
@@ -67,10 +71,13 @@
       
       reader.readAsDataURL(file);
     } else {
-      guardarProducto("");
+      // Mostrar mensaje de error o manejar el caso de archivo no válido
+      alert('Por favor, sube un archivo de imagen válido (.jpg, .png, .webp)');
     }
-
+  } else {
+    guardarProducto("");
   }
+}
   async function guardarProducto(image){
     const currentUrl = window.location.href;
     const urlBase = currentUrl.split("/")[2];
