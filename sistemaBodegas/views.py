@@ -36,6 +36,12 @@ def reporteTalla(request):
 def reporteCompras(request):
     return render(request, 'static/reportecompras.html')
 
+def reporteComprasProv(request):
+    return render(request, 'static/reportecomprasProv.html')
+
+def reporteComprasNum(request):
+    return render(request, 'static/reportecomprasNum.html')
+
 def reporteVentasd(request):
     return render(request, 'static/reporteventasd.html')
 

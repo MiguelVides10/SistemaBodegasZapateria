@@ -377,6 +377,42 @@ class InventarioReporteComprasListView(generics.ListAPIView):
             "data": rows,
         }
         return Response(response_data)
+class InventarioReporteComprasProvListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        proveedor= request.query_params.get('proveedor',"")
+        with connection.cursor() as cursor:
+            cursor.execute("select DATE_FORMAT(fecha_fact , '%%d/%%m/%%Y') as fecha,p.nom_proveedor,f.* from facturas f inner join proveedores p using(cod_proveedor) where cod_proveedor = %s",[proveedor])
+
+            rows = dictfetchall(cursor)
+
+            for row in rows:
+                cursor.execute("select * from productos_bodegas pb where pb.id_factura = %s", [row["idfactura"]])
+                productos = dictfetchall(cursor)
+                row["productos"] = productos
+
+        response_data = {
+            "success": True,
+            "data": rows,
+        }
+        return Response(response_data)
+class InventarioReporteComprasNumListView(generics.ListAPIView):
+    def get(self, request, *args, **kwargs):
+        numero= request.query_params.get('numero',"")
+        with connection.cursor() as cursor:
+            cursor.execute("select DATE_FORMAT(fecha_fact , '%%d/%%m/%%Y') as fecha,p.nom_proveedor,f.* from facturas f inner join proveedores p using(cod_proveedor) where num_fact = %s",[numero])
+
+            rows = dictfetchall(cursor)
+
+            for row in rows:
+                cursor.execute("select * from productos_bodegas pb where pb.id_factura = %s", [row["idfactura"]])
+                productos = dictfetchall(cursor)
+                row["productos"] = productos
+
+        response_data = {
+            "success": True,
+            "data": rows,
+        }
+        return Response(response_data)
     
 class VentaReporteListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
