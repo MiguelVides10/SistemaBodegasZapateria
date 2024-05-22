@@ -71,7 +71,7 @@
   </div>
   <div class="row mt-4">
     <div class="col-2">
-      <label for="">Reporte de compras por numero</label>
+      <label for="">Reporte de compras por número de factura</label>
     </div>
     <div class="col-3">
       <input class="form-control" id="num_fact" name="num_fact" type="text" placeholder="Numero de factura" />
@@ -87,7 +87,7 @@
   </div>
   <div class="row mt-4">
     <div class="col-6">
-      <label for="">Reporte de Ventas por día</label>
+      <label for="">Reporte de Ventas por fecha actual</label>
     </div>
     <div class="col-3">
       <button type="submit" class="btn btn-secondary " onclick="generarReporteVentasd()">
@@ -105,9 +105,11 @@
       <label for="">Reporte de Ventas por fechas</label>
     </div>
     <div class="col-2">
+      <label for="fechaInicio">Desde: </label>
       <input class="form-select" id="fechaInicio" name="datepicker" type="text" placeholder="Desde: " />
     </div>
     <div class="col-2">
+      <label for="fechaFin">Hasta: </label>
       <input class="form-select" id="fechaFin" name="datepicker" type="text" placeholder="Hasta: " />
     </div>
     <div class="col-2">
