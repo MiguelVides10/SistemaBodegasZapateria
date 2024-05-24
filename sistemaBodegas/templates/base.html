@@ -127,13 +127,13 @@
   });
 
   const salir = async() => {
-    console.log("saliendo");
     const request = `${url}/api/eliminar-token/`;
     const token = localStorage.getItem('token');
     var myHeaders = new Headers();
     myHeaders.append("Authorization", `Token ${token}`);
     let data = new FormData();
     data.append("token",token);
+    localStorage.removeItem('token');
     let response = await fetch(request, {
 			method: 'POST',
       headers: myHeaders,
@@ -151,7 +151,6 @@
 				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
 				return respuesta;
 			});
-		response = JSON.parse(response);
     localStorage.removeItem('token');
     location.href = '/login/'
   }
