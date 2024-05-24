@@ -19,21 +19,21 @@
 								<div class="col-5">
 									<label for="">Cantidad a vender:</label>
 								</div>
-							<div class="col-7">
-								<input name="cantidad" id="cantidad" class="form-control" type="number" min="0"
-									placeholder="Cantidad" required />
+								<div class="col-7">
+									<input name="cantidad" id="cantidad" class="form-control" type="number" min="0"
+										placeholder="Cantidad" required />
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-5">
+									<label for="">Precio al que se vendio:</label>
+								</div>
+								<div class="col-7">
+									<input name="precio_vendido" id="precio_vendido" class="form-control" type="number"
+										placeholder="Precio vendido" required />
+								</div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-5">
-								<label for="">Precio al que se vendio:</label>
-							</div>
-							<div class="col-7">
-								<input name="precio_vendido" id="precio_vendido" class="form-control" type="number"
-								placeholder="Precio vendido" required />
-							</div>
-						</div>
-					</div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -102,23 +102,24 @@
 	</div>
 	<div class="modal fade" id="modalAlert" tabindex="-1" aria-labelledby="modalAlertLabel" aria-hidden="true">
 		<div class="modal-dialog">
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <h5 class="modal-title" id="modalAlertLabel">Alerta de Inventario</h5>
-			  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalAlertLabel">Alerta de Inventario</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					La cantidad de productos en inventario es menor o igual a 5.
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+				</div>
 			</div>
-			<div class="modal-body">
-			  La cantidad de productos en inventario es menor o igual a 5.
-			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-			</div>
-		  </div>
 		</div>
-	  </div>
+	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"
 	integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 
 	const currentUrl = window.location.href;
@@ -244,10 +245,10 @@
 				const modalAlert = new bootstrap.Modal(document.getElementById('modalAlert'));
 				const modalBody = document.querySelector('#modalAlert .modal-body');
 
-					if (stock <= 5) {
-						modalBody.textContent = `Hay ${stock} productos en Stock `;
-						modalAlert.show();
-					}
+				if (stock <= 2) {
+					modalBody.textContent = `Hay ${stock} productos en Stock `;
+					modalAlert.show();
+				}
 
 				productoVenta = {
 					"id_sucursal": inventario.id_sucursal,
@@ -278,33 +279,33 @@
 							<button type="submit" class="btn btn-outline-secondary text-dark w-50 h-25 mt-3"  data-bs-toggle="modal" data-bs-target="#modalVentas">Vender</button>
 						</div>`
 				resultado.innerHTML = contenido;
-			    resultado.style.display = "block";
-			
+				resultado.style.display = "block";
+
 			} else {
 				console.log("data esta vacio");
-				contenido+=`<h1 class="h1 text-center">No hay productos con esas características en inventario</h1>`				
-				resultado.innerHTML= contenido;
+				contenido += `<h1 class="h1 text-center">No hay productos con esas características en inventario</h1>`
+				resultado.innerHTML = contenido;
 				resultado.style.display = "block";
 			}
 		}
-			
+
 	}
 	const venderProducto = async () => {
 		const cantidad = document.getElementById("cantidad").value;
 		const precio = document.getElementById("precio_vendido").value;
 
-				if (cantidad > stock) {
-					alert("No hay suficiente stock para realizar esta venta");
-					return;
-				}
-				const venta = {
-					...productoVenta,
-					cantidad: cantidad,
-					total: cantidad*precio,
-					precio:precio
-				}
-
+		if (cantidad > stock) {
+			alert("No hay suficiente stock para realizar esta venta");
+			return;
+		}
+		const venta = {
+			...productoVenta,
+			cantidad: cantidad,
+			total: (cantidad * precio),
+			precio: precio
+		}
 		const request = `${url}/api/venderInventario/`;
+
 		const headers = new Headers({
 			'Authorization': `Token ${localStorage.getItem('token')}`,
 			'Content-Type': 'application/json'
