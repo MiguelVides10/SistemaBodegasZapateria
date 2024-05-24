@@ -1,0 +1,192 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Reporte PDF</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <style>
+        @page {
+            size: "landscape";
+            margin: 1.0cm 1.5cm 2.5cm 1.5cm;
+        }
+        body {
+            width: 100% !important;
+            height: 100%;
+            background: #fff;
+            color: black;
+            font-size: 100%;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none; 
+        }
+        hr {
+            border-bottom: 2px solid black;
+        }
+
+    </style>
+</head>
+<body>
+<main class="container" id="contenido">
+    <div id="cabecera">
+    </div>
+    <hr>
+    <br>
+            <br>
+            <br>
+            <br>
+    <div id="cuerpo"></div>
+    
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+    const currentUrl = window.location.href;
+	const urlBase = currentUrl.split("/")[2];
+	const protocolo = currentUrl.split(":")[0];
+    const cod_prod = currentUrl.split("/")[4];
+	const url = protocolo + "://" + urlBase;
+    const urlActual = window.location.href;
+    const urlParams = new URL(urlActual);
+    const Descargar = urlParams.searchParams.get('descargar');
+    document.addEventListener('DOMContentLoaded', async function(){
+        const urlActual = window.location.href;
+        const urlparams = new URL(urlActual);
+        const fecha = urlparams.searchParams.get('fecha');
+        const headers = new Headers({
+			'Authorization': `Token ${localStorage.getItem('token')}`
+		});
+        let informacion = await fetch(`${url}/api/cuerporeporteCompras/?fecha=${fecha}`,{
+            method: 'GET',
+            headers:headers
+        }).then(function (response) {
+				if (response.ok) {
+					return response.text()
+				} else {
+					throw "Error en la llamada";
+				}
+
+			})
+			.then(function (texto) {
+				return texto;
+			})
+			.catch(function (err) {
+				var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+				return respuesta;
+			});
+        informacion = JSON.parse(informacion);
+        let contenido ="";
+        
+        if (informacion.success){
+            informacion.data.forEach(item => {
+            contenido += `   
+            <div class="row">
+                <div class="col">
+                    <h3>Factura ${item.num_fact}</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p class="lead">Descuento aplicado: ${item.descuento}%</p>
+                </div>
+                <div class="col">
+                    <p class="lead">Proveedor: ${item.nom_proveedor}</p>
+                </div>
+            </div>
+            <hr>
+            `;
+                            
+
+            contenido += `
+                    <table id="resultado" class="table table-bordered mt-4" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Sucursal</th>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Costo</th>
+                                <th>Talla</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            let totalFactura = 0;
+            item.productos.forEach(element => {
+                contenido += `
+                <tr>
+                    <td>${element.id_sucursal}</td>
+                    <td>${element.cod_prod}</td>
+                    <td>${element.cantidad}</td>
+                    <td>${element.costo}</td>
+                    <td>${element.talla}</td>
+                    <td>$${element.total}</td>
+                <tr>`
+                    totalFactura+=element.total;
+            });
+            contenido += `
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan=5></td>   
+                    <td>$${totalFactura}</td>   
+                <tr>    
+            </tfoot>
+            </table>
+            <br>
+            <br>
+            <br>
+            <br>
+
+            `;
+
+        });
+        }
+        const cuerpo = document.getElementById("cuerpo");
+        cuerpo.innerHTML = contenido;
+
+        const cabecera = document.getElementById("cabecera");
+        const fechaActual = new Date();
+        var dia = fechaActual.getDate();
+        var mes = fechaActual.getMonth()+1;
+        var anio = fechaActual.getFullYear();
+        var hora = fechaActual.getHours();
+        var minutos = fechaActual.getMinutes();
+        var formatFecha = dia + "/"+ mes + "/"+ anio;
+        var horaCompleta = hora +":"+minutos;
+        let fechaReporte = `    <h1 class="h1">Reporte de compras en la fecha: ${fecha}</h1>
+                                <h2 class="h2">Variedades Nahomy</h2>
+                                <img class="me-2" src="{%static '/img/photos/LogoD.png'%}" alt="logo calzado Nahomy" id="imagenLogo" width="25%">
+                                <h3 class="h3" >Hora: ${horaCompleta}</h3>
+                                
+                                `;
+        cabecera.innerHTML= fechaReporte;
+
+        window.jsPDF = window.jspdf.jsPDF;
+
+        var doc = new jsPDF();
+        var datos = document.getElementById("contenido");
+        doc.html(datos, {
+                callback: function(doc) {
+                    // Save the PDF
+                    if(Descargar==1){
+                        doc.save(`reporte${cod_prod}-${dia}-${mes}-${anio}.pdf`);
+                    }
+                },
+                x: 15,
+                y: 15,
+                width: 190, //target width in the PDF document
+                windowWidth: 800 //window width in CSS pixels
+            });
+            if(Descargar==1){
+                setTimeout(function(){
+                    window.location.href =`${url}/reporte/`
+                },1000);
+            }
+            
+    });
+
+</script>
+</body>
+</html>

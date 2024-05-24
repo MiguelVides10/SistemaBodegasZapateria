@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -21,3 +22,5 @@ local_settings.py
 # Virtualenv
 venv/
 config.json
+=======
+*pyc

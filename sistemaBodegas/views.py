@@ -27,8 +27,26 @@ def editar(request,id):
 def cuerpoReporte(request):
     return render(request, 'static/cuerporeporte.html')
 
+def bodega(request):
+    return render(request, 'static/bodegas.html')
+
 def reporteTalla(request):
     return render(request, 'static/reportetalla.html')
+
+def reporteCompras(request):
+    return render(request, 'static/reportecompras.html')
+
+def reporteComprasProv(request):
+    return render(request, 'static/reportecomprasProv.html')
+
+def reporteComprasNum(request):
+    return render(request, 'static/reportecomprasNum.html')
+
+def reporteVentasd(request):
+    return render(request, 'static/reporteventasd.html')
+
+def reporteVentasf(request):
+    return render(request, 'static/reporteventasf.html')
 
 def reporte(request):
     return render(request, 'static/reporte.html',{'navbar':'reporte'})

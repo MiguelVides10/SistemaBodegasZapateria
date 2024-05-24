@@ -31,7 +31,7 @@
             <div class="col-3">
                 <div class="form-floating mb-3">
                     <input name="descuento" id="descuento" class="form-control" type="number" placeholder="Descuento"
-                        required value="0"/>
+                        required value="0" min="0" max="100"/>
                     <label for="descuento">Descuento</label>
                 </div>
             </div>
@@ -84,7 +84,7 @@
             <input type="number" class="form-control" id="cantidad" name="cantidad" placeholder="Cantidad" />
         </div>
         <div class="col">
-            <input type="number" class="form-control" id="costo" name="costo" placeholder="costo" />
+            <input type="number" class="form-control" id="costo" name="costo" placeholder="Costo Unitario" />
         </div>
         <div class="col">
             <div>
@@ -243,6 +243,20 @@
             $('#cod_prod').select2();
             $('#talla').select2();
 
+            var inputFecha = document.getElementById('fecha_fact');
+
+        // Obtener la fecha actual
+        var fechaActual = new Date();
+
+        // Formatear la fecha en formato 'dd/mm/YYYY'
+        var dia = ('0' + fechaActual.getDate()).slice(-2);
+        var mes = ('0' + (fechaActual.getMonth() + 1)).slice(-2);
+        var anio = fechaActual.getFullYear();
+        var fechaFormateada = dia + '/' + mes + '/' + anio;
+
+        // Establecer la fecha formateada como el valor del campo de entrada
+        inputFecha.value = fechaFormateada;
+
         });
 
         agregarProducto = () => {
@@ -257,13 +271,13 @@
             const descuento = document.getElementById("descuento");
 
             if (bodega.value == 0) {
-                alert("Selecciones una bodega");
+                alert("Seleccione una bodega");
                 return;
             } else if (cod_prod.value == 0) {
-                alert("Selecciones un producto");
+                alert("Seleccione un producto");
                 return;
             } else if (talla.value == 0) {
-                alert("Selecciones una talla");
+                alert("Seleccione una talla");
                 return;
             } else if (cantidad.value <= 0) {
                 alert("La cantidad debe ser mayor que 0");
@@ -274,10 +288,7 @@
             }
             const totalActual = cantidad.value * costo.value;
             total = total + totalActual
-            console.log("TOtal:"+total);
-            console.log("desc:"+descuento.value);
             const totalConDecuento = (descuento.value > 0) ? (total - (total * (descuento.value/100))) : total;
-            console.log("desc:"+totalConDecuento);
 
             const html = `
             <tr>

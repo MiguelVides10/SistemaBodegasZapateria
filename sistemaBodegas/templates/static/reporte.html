@@ -1,8 +1,9 @@
 {% extends "../base.html"%}
 {% load static %}
 {%block template%}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css" rel="stylesheet" />
 <div class="container-fluid p-0">
-  
+
   <div class="row ">
     <div class="col-2">
       <label for="">Reporte por producto</label>
@@ -12,6 +13,7 @@
         <option hidden selected>Producto</option>
       </select>
     </div>
+    <div class="col-1"></div>
     <div class="col-3">
       <button type="submit" class="btn btn-secondary" onclick="generarReporteTalla()">Generar reporte</button>
     </div>
@@ -20,7 +22,7 @@
     </div>
   </div>
   <div class="row mt-4">
-    <div class="col-5">
+    <div class="col-6">
       <label for="">Reporte general</label>
     </div>
     <div class="col-3">
@@ -34,12 +36,173 @@
       </button>
     </div>
   </div>
+  <div class="row mt-4">
+    <div class="col-2">
+      <label for="">Reporte de compras</label>
+    </div>
+    <div class="col-3">
+      <input class="form-select" id="datepicker" name="datepicker" type="text" placeholder="Seleccione una fecha" />
+    </div>
+    <div class="col-1"></div>
+
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteCompras()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteCompras()">Descargar reporte</button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-2">
+      <label for="">Reporte de compras por proveedor</label>
+    </div>
+    <div class="col-3">
+      <select class="form-select" id="id_proveedor" name="id_proveedor">
+      </select>
+    </div>
+    <div class="col-1"></div>
+
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteComprasProv()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteComprasProv()">Descargar reporte</button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-2">
+      <label for="">Reporte de compras por número de factura</label>
+    </div>
+    <div class="col-3">
+      <input class="form-control" id="num_fact" name="num_fact" type="text" placeholder="Numero de factura" />
+    </div>
+    <div class="col-1"></div>
+
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteComprasNum()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteComprasNum()">Descargar reporte</button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-6">
+      <label for="">Reporte de Ventas por fecha actual</label>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="generarReporteVentasd()">
+        Generar Reporte
+      </button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary " onclick="descargarReporteVentasD()">
+        Descargar Reporte
+      </button>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="col-3">
+      <label for="">Reporte de Ventas por fechas</label>
+    </div>
+    <div class="col-2">
+      <label for="fechaInicio">Desde: </label>
+      <input class="form-select" id="fechaInicio" name="datepicker" type="text" placeholder="Desde: " />
+    </div>
+    <div class="col-2">
+      <label for="fechaFin">Hasta: </label>
+      <input class="form-select" id="fechaFin" name="datepicker" type="text" placeholder="Hasta: " />
+    </div>
+    <div class="col-2">
+      <button type="submit" class="btn btn-secondary" onclick="generarReporteVentasF()">Generar reporte</button>
+    </div>
+    <div class="col-3">
+      <button type="submit" class="btn btn-secondary" onclick="descargarReporteVentasF()">Descargar reporte</button>
+    </div>
+  </div>
 </div>
 
 {%endblock%}
 
 {%block script%}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 <script>
+  $(document).ready(function () {
+    const date = new Date()
+    $("#datepicker").datepicker({
+      dateFormat: "dd/mm/yy",
+      defaultDate: new Date()
+    });
+    var dia = date.getDate().toString().padStart(2, '0');
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#datepicker").val(fechaFormateada)
+    cargarProveedores()
+
+  });
+  async function cargarProveedores() {
+    const headers = new Headers({
+      'Authorization': `Token ${localStorage.getItem('token')}`
+    });
+    let proveedores = await fetch(`${url}/api/proveedores`, {
+      method: 'GET',
+      headers: headers
+    })
+      .then(function (response) {
+        if (response.ok) {
+          return response.text()
+        } else {
+          throw "Error en la llamada";
+        }
+
+      })
+      .then(function (texto) {
+        return texto;
+      })
+      .catch(function (err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+
+    proveedores = JSON.parse(proveedores);
+    let listaProveedores = "<option value='0' hidden selected>Seleccione una proveedor</option>";
+    if (proveedores.success) {
+      proveedores.data.forEach(element => {
+        listaProveedores += `<option value='${element.cod_proveedor}'>${element.nom_proveedor}</option>`;
+      });
+    }
+    const selectProveedores = document.getElementById('id_proveedor');
+    selectProveedores.innerHTML = listaProveedores;
+  }
+  $(document).ready(function () {
+    const date = new Date()
+    $("#fechaInicio").datepicker({
+      dateFormat: "dd/mm/yy",
+      defaultDate: new Date()
+    });
+    var dia = date.getDate().toString().padStart(2, '0');
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#fechaInicio").val(fechaFormateada)
+  });
+
+  $(document).ready(function () {
+    const date = new Date()
+    $("#fechaFin").datepicker({
+      dateFormat: "dd/mm/yy",
+      defaultDate: new Date()
+    });
+    var dia = date.getDate().toString().padStart(2, '0');
+    var mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    var anio = date.getFullYear();
+    var fechaFormateada = `${dia}/${mes}/${anio}`;
+    $("#fechaFin").val(fechaFormateada)
+  });
+
   const currentUrl = window.location.href;
   const urlBase = currentUrl.split("/")[2];
   const protocolo = currentUrl.split(":")[0];
@@ -86,7 +249,7 @@
     const selectElement2 = document.getElementById("productos");
     selectElement2.innerHTML = listaProductos;
   });
-  
+
   function generarReporteTalla() {
     const cod_prod = document.getElementById("productos").value;
     if (cod_prod == "" || cod_prod == "0") {
@@ -95,7 +258,7 @@
     }
     window.open(`${url}/reporteportalla/?cod_prod=${cod_prod}`, '_blank');
   }
-  
+
   function descargarReporteTalla() {
     const cod_prod = document.getElementById("productos").value;
     if (cod_prod == "" || cod_prod == "0") {
@@ -104,6 +267,131 @@
     }
     window.location.href = `${url}/reporteportalla/?cod_prod=${cod_prod}&descargar=1`
   }
-  
+
+  function generarReporteCompras() {
+    const fecha = document.getElementById("datepicker").value;
+    if (fecha == "") {
+      alert("Seleccione una fecha");
+      return;
+
+    }
+
+    window.open(`${url}/reporteporcompras/?fecha=${fecha}`, '_blank');
+  }
+
+  function descargarReporteCompras() {
+    const fecha = document.getElementById("datepicker").value;
+    if (fecha == "") {
+      alert("Seleccione una fecha")
+      return;
+
+    }
+    window.location.href = `${url}/reporteporcompras/?fecha=${fecha}&descargar=1`
+  }
+  function generarReporteComprasProv() {
+    const proveedor = document.getElementById("id_proveedor").value;
+    if (proveedor == 0) {
+      alert("Seleccione un proveedor")
+      return;
+
+    }
+
+    window.open(`${url}/reporteporcomprasProv/?proveedor=${proveedor}`, '_blank');
+  }
+
+  function descargarReporteComprasProv() {
+    const proveedor = document.getElementById("id_proveedor").value;
+    if (proveedor == 0) {
+      alert("Seleccione un proveedor")
+      return;
+
+    }
+
+    window.location.href = `${url}/reporteporcomprasProv/?proveedor=${proveedor}&descargar=1`
+  }
+  function generarReporteComprasNum() {
+    const numero = document.getElementById("num_fact").value;
+    console.log(numero);
+    if (numero == "") {
+      alert("Escriba el numero de factura")
+      return;
+
+    }
+
+    window.open(`${url}/reporteporcomprasNum/?numero=${numero}`, '_blank');
+  }
+
+  function descargarReporteComprasNum() {
+    const numero = document.getElementById("num_fact").value;
+    if (numero !== "") {
+      alert("Escriba el numero de factura")
+      return;
+
+    }
+    window.location.href = `${url}/reporteporcomprasNum/?numero=${numero}&descargar=1`
+  }
+
+  function generarReporteVentasd() {
+    const fechaActual = new Date();
+    const dia = fechaActual.getDate();
+    const mes = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const anio = fechaActual.getFullYear();
+
+    // Asegurarse de que el día y el mes tengan dos dígitos
+    const diaFormateado = dia.toString().padStart(2, '0');
+    const mesFormateado = mes.toString().padStart(2, '0');
+
+    const fechaFormat = `${diaFormateado}/${mesFormateado}/${anio}`;
+
+    window.open(`${url}/reporteventasd/?fecha=${fechaFormat}`, '_blank');
+  }
+
+  function descargarReporteVentasD() {
+    const fechaActual = new Date();
+    const dia = fechaActual.getDate();
+    const mes = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const anio = fechaActual.getFullYear();
+
+    // Asegurarse de que el día y el mes tengan dos dígitos
+    const diaFormateado = dia.toString().padStart(2, '0');
+    const mesFormateado = mes.toString().padStart(2, '0');
+
+    const fechaFormat = `${diaFormateado}/${mesFormateado}/${anio}`;
+    window.location.href = `${url}/reporteventasd/?fecha=${fechaFormat}&descargar=1`
+  }
+
+  function generarReporteVentasF() {
+    const fechai = document.getElementById("fechaInicio").value;
+    if (fechai == "") {
+      alert("Seleccione una fecha de inicio")
+      return;
+
+    }
+    const fechad = document.getElementById("fechaFin").value;
+    if (fechad == "") {
+      alert("Seleccione una fecha de Fin")
+      return;
+
+    }
+    window.open(`${url}/reporteventasf/?fechai=${fechai}&fechad=${fechad}`, '_blank');
+  }
+
+  function descargarReporteVentasF() {
+    const fechai = document.getElementById("fechaInicio").value;
+    if (fechai == "") {
+      alert("Seleccione una fecha de inicio")
+      return;
+
+    }
+    const fechad = document.getElementById("fechaFin").value;
+    if (fechad == "") {
+      alert("Seleccione una fecha de Fin")
+      return;
+
+    }
+    window.open(`${url}/reporteventasf/?fechai=${fechai}&fechad=${fechad}&descargar=1`, '_blank');
+
+  }
+
 </script>
 {%endblock%}

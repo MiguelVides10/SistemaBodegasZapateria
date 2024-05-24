@@ -5,14 +5,14 @@
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.jqueryui.min.css" rel="stylesheet">
 
 <div class="container">
+    <h1 class="h1 text-center mb-4">Productos</h1>
     <div class="d-flex mb-4">
-        <a class="btn btn-secondary me-3" href="/guardar/">Nuevo Producto</a>
         <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalMarcas">
             Marcas
         </button>
         <div class="modal fade" id="modalMarcas" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Marcas</h5>
@@ -38,12 +38,45 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary me-3" data-bs-toggle="modal" data-bs-target="#modalProveedores">
+        
+
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCategorias">
+            Categorías
+        </button>
+        <div class="modal fade" id="modalCategorias" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Categorías</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="categoriasTabla">
+
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="catForm" class="d-flex">
+                            <div class="form-floating me-3">
+                                <input name="categoria" id="categoria" class="form-control" type="text" required />
+                                <label for="categoria">Categoría</label>
+                            </div>
+                            <button class="btn btn-secondary" type="submit">Agregar
+                                Categoría</button>
+                        </form>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary mx-3" data-bs-toggle="modal" data-bs-target="#modalProveedores">
             Proveedores
         </button>
         <div class="modal fade" id="modalProveedores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="staticBackdropLabel">Proveedores</h5>
@@ -70,41 +103,30 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCategorias">
-            Categorías
-        </button>
-        <div class="modal fade" id="modalCategorias" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">Categorías</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table id="categoriasTabla">
-
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <form id="catForm" class="d-flex">
-                            <div class="form-floating me-3">
-                                <input name="categoria" id="categoria" class="form-control" type="text" required />
-                                <label for="categoria">Categoría</label>
-                            </div>
-                            <button class="btn btn-secondary" type="submit">Agregar
-                                Categoría</button>
-                        </form>
-                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <a class="btn btn-secondary me-3" href="/bodegas/">Bodegas</a>
+        <a class="btn btn-secondary me-3" href="/guardar/">Nuevo Producto</a>
 
     </div>
+    
     <table id="tablaProductos" class="table table-striped" style="width:100%">
     </table>
-
+    <div class="modal fade" id="confirmarEliminacionModal" tabindex="-1" aria-labelledby="confirmarEliminacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmarEliminacionModalLabel">Confirmar Eliminación</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ¿Estás seguro de que quieres eliminar este producto?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-danger" id="confirmarEliminacionBtn">Eliminar Producto</button>
+            </div>
+          </div>
+        </div>
+      </div>
 </div>
 {%endblock%}
 
@@ -446,35 +468,44 @@
     }
 
     async function eliminarProducto(cod_prod) {
-        const headers = new Headers({
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        });
-        let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`, {
-            method: 'DELETE',
-            headers: headers
-        }).then(function (response) {
-            if (response.ok) {
-                return response.text()
-            } else {
-                throw "Error en la llamada";
-            }
-        })
-            .then(function (texto) {
-                return texto;
-            })
-            .catch(function (err) {
-                var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
-                return respuesta;
-            });
-        response = JSON.parse(response);
-        if (response.success) {
-            alert(response.message);
-            window.location.href = "/productos/";
+    // Modal de confirmación de eliminación
+    const confirmarEliminacionModal = new bootstrap.Modal(document.getElementById('confirmarEliminacionModal'));
+    
+    // Configurar evento click para el botón de confirmación de eliminación
+    document.getElementById('confirmarEliminacionBtn').addEventListener('click', async function() {
+      const headers = new Headers({
+        'Authorization': `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      });
+      let response = await fetch(`${url}/api/eliminarProd/${cod_prod}`, {
+        method: 'DELETE',
+        headers: headers
+      }).then(function(response) {
+        if (response.ok) {
+          return response.text()
         } else {
-            alert(response.message);
+          throw "Error en la llamada";
         }
-    }
+      })
+      .then(function(texto) {
+        return texto;
+      })
+      .catch(function(err) {
+        var respuesta = '{"success":false,"error":true,"msg":"' + err + '"}';
+        return respuesta;
+      });
+      response = JSON.parse(response);
+      if (response.success) {
+        alert(response.message);
+        window.location.href = "/productos/";
+      } else {
+        alert(response.message);
+      }
+    });
+    
+    // Mostrar modal de confirmación de eliminación
+    confirmarEliminacionModal.show();
+  }
     function eliminar(cod_prod) {
         eliminarProducto(cod_prod);
     }
